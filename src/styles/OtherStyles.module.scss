@@ -1,0 +1,14 @@
+.fake_nav {
+  @media (max-width: 900px) {
+    min-height: 70px;
+  }
+}
+
+.footer {
+  a {
+    transition: all 0.1s ease;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

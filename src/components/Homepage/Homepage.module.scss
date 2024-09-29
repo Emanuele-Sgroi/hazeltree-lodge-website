@@ -1,0 +1,38 @@
+// Hero section
+
+.imagesWrapper {
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+  animation: zoomEffect 30s linear infinite;
+}
+
+.imagesWrapper.visible {
+  opacity: 1;
+}
+
+@keyframes zoomEffect {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.heroContent {
+  @media (max-height: 550px) {
+    gap: 2rem;
+  }
+}
+
+.scrollLink {
+  @media (max-height: 550px) {
+    padding: 1rem;
+    position: absolute;
+    bottom: 8px;
+    right: 16px;
+  }
+}
