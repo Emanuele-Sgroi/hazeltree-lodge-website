@@ -73,12 +73,13 @@ export const useBeds24Calendar = (startDate, endDate) => {
 
   const url =
     startDate && endDate
-      ? `/api/beds24-calendar?startDate=${startDate}&endDate=${endDate}`
+      ? `/api/beds24-calendar?startDate=${startDate}&endDate=${endDate}&includePrices=true`
       : null;
 
   const { data, error } = useSWR(url, fetcher, {
-    revalidateOnFocus: false,
+    revalidateOnFocus: true,
     dedupingInterval: 0,
+    refreshInterval: 60000,
     onLoadingSlow: () => setIsLoading(true),
     onSuccess: () => setIsLoading(false),
     onError: () => setIsLoading(false),
