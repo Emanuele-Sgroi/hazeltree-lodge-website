@@ -6,11 +6,11 @@
  * @date 20 August 2024
  */
 
-// "use client"; // This component runs on the client side
+"use client";
 
-// import React, { useEffect, useState } from "react";
-// import { useSiteContent } from "@/context/SiteContentContext";
-// import { getAssetUrl } from "@/utils/imageUtils";
+import React, { useEffect, useState } from "react";
+import { useSiteContent } from "@/context/SiteContentContext";
+import { getAssetUrl } from "@/utils/imageUtils";
 
 /**
  * BreakfastMenuWrapper Component
@@ -19,60 +19,10 @@
  *
  * @returns {JSX.Element} The rendered BreakfastMenuWrapper component.
  */
-// const BreakfastMenuWrapper = () => {
-//   const { general } = useSiteContent();
-//   const [isMobile, setIsMobile] = useState(false);
-
-//   useEffect(() => {
-//     // Detect if the user is on a mobile device
-//     setIsMobile(window.innerWidth <= 768);
-
-//     // Prevent body scroll when this component is active
-//     document.body.style.overflow = "hidden";
-
-//     return () => {
-//       // Re-enable scrolling when this component is unmounted
-//       document.body.style.overflow = "auto";
-//     };
-//   }, []);
-
-//   if (!general) {
-//     return (
-//       <div className="p-4">
-//         <p>Please wait</p>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="fixed bg-primary w-full min-h-svh h-svh z-[99999]">
-//       <iframe
-//         src={`https://docs.google.com/viewer?url=${getAssetUrl(
-//           general.breakfastMenu
-//         )}&embedded=true`}
-//         title="Breakfast Menu"
-//         type="application/pdf"
-//         allowtransparency="true"
-//         frameBorder="0"
-//         className="w-full min-h-svh h-svh"
-//       ></iframe>
-//     </div>
-//   );
-// };
-
-// export default BreakfastMenuWrapper;
-
-"use client"; // This component runs on the client side
-
-import React, { useEffect, useState } from "react";
-import { useSiteContent } from "@/context/SiteContentContext";
-import { getAssetUrl } from "@/utils/imageUtils";
-
 const BreakfastMenuWrapper = () => {
   const { general } = useSiteContent();
   const [isMobile, setIsMobile] = useState(false);
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
-  const [hasTimedOut, setHasTimedOut] = useState(false);
 
   useEffect(() => {
     // Detect if the user is on a mobile device
