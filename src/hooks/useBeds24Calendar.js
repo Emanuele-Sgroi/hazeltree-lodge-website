@@ -78,7 +78,7 @@ export const useBeds24Calendar = (startDate, endDate) => {
 
   const { data, error } = useSWR(url, fetcher, {
     revalidateOnFocus: false,
-    dedupingInterval: 60000,
+    dedupingInterval: 0,
     onLoadingSlow: () => setIsLoading(true),
     onSuccess: () => setIsLoading(false),
     onError: () => setIsLoading(false),

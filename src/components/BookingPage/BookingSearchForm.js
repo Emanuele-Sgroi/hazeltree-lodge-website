@@ -9,6 +9,7 @@
 "use client"; // This component runs on the client side
 
 import React, { useState, useEffect } from "react";
+import { mutate } from "swr";
 import { useBeds24Calendar } from "@/hooks/useBeds24Calendar";
 import DatePicker from "react-datepicker";
 import { registerLocale } from "react-datepicker";
@@ -264,6 +265,13 @@ const BookingSearchForm = ({
         setEndDate(end);
         setNightsCount(stayDuration);
       }
+
+      // Trigger revalidation after changing the dates
+      const apiStartDate = format(start, "yyy-MM-dd");
+      const apiEndDate = format(end, "yyy-MM-dd");
+      mutate(
+        `/api/beds24-calendar?startDate=${apiStartDate}&endDate=${apiEndDate}`
+      );
 
       closeCalendarModal(); // Close modal after selecting dates
     } else {
