@@ -73,7 +73,8 @@ const ConfirmationWrapper = () => {
   };
 
   return (
-    <section className=" min-h-svh w-full relative flex justify-center items-center px-4 py-12">
+    <section className=" min-h-svh w-full relative flex flex-col justify-center items-center px-4 py-12">
+      <div className="flex md:hidden w-full h-[60px] sm:h-[90px]" />
       <div className="relative p-8 bg-primary rounded-sm shadow-md max-w-[550px] z-[2] flex flex-col justify-center items-center text-center">
         {bookingData ? (
           <>

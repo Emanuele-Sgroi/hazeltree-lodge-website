@@ -24,11 +24,18 @@ const HeroSection = () => {
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const heroRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [offset, setOffset] = useState(-90);
 
   // Handle responsive behavior for mobile devices
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 900);
+
+      if (window.innerWidth < 640) {
+        setOffset(-61);
+      } else {
+        setOffset(-90);
+      }
     };
 
     handleResize();
@@ -147,7 +154,7 @@ const HeroSection = () => {
           to="about-section"
           smooth={true}
           duration={1000}
-          offset={-90}
+          offset={offset}
           className={`${styles.scrollLink} absolute bottom-6 cursor-pointer flex flex-col justify-center items-center transition-all z-10`}
         >
           <p className="text-white text-s font-normal mb-1">SCROLL</p>

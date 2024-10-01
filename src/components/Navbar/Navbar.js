@@ -79,7 +79,7 @@ const Navbar = ({ alwaysVisible = false }) => {
         }`}
       >
         <div
-          className={`size-full flex justify-between items-center px-8 lg:px-12 py-3 md:py-5 lg:py-6 min-h-[92px]`}
+          className={`size-full flex justify-between items-center px-8 lg:px-12 py-3 md:py-5 lg:py-6 min-h-[60px] sm:min-h-[92px]`}
         >
           {/* Menu Toggle Button */}
           <div>

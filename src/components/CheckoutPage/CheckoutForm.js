@@ -305,7 +305,7 @@ const CheckoutForm = ({ totalPrice, bookingData, sessionId }) => {
                       notes: addNote,
                       price: 0,
                       deposit: 0,
-                      allowAutoAction: "enable",
+                      allowAutoAction: "disable",
                       actions: {
                         makeGroup: true,
                       },
@@ -362,7 +362,7 @@ const CheckoutForm = ({ totalPrice, bookingData, sessionId }) => {
         <GuestDetails form={form} />
         <PaymentDetails form={form} />
         <div className="flex flex-col items-center justify-center py-2 px-4">
-          <p className="text-s mb-4">
+          <p className="text-s mb-4 text-center">
             By clicking &quot;Finish and Pay&quot; you agree to our{" "}
             <span>
               <Link
