@@ -1,5 +1,5 @@
 // next-sitemap.js
 module.exports = {
-  siteUrl: process.env.SITE_URL || "http://localhost:3000", // Fallback to localhost
+  siteUrl: process.env.SITE_URL,
   generateRobotsTxt: true, // Generate robots.txt file
 };

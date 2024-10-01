@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.hazeltreelodge.com
+
+# Sitemaps
+Sitemap: https://www.hazeltreelodge.com/sitemap.xml
