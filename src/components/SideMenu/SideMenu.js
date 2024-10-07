@@ -67,7 +67,7 @@ const SideMenu = ({ isMenuOpen, onClick }) => {
               { href: "/", text: "Home" },
               // { href: "/about", text: "About" },
               { href: "/rooms", text: "Rooms" },
-              { href: "/things-to-do", text: "Things to do" },
+              { href: "/local-activities", text: "Local Activities" },
             ].map((link) => (
               <li key={link.href}>
                 <Link

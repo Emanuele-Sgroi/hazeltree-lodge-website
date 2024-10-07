@@ -96,7 +96,7 @@ const Footer = () => {
                 { name: "Book Now", href: "/booking" },
                 // { name: "About", href: "/about" },
                 { name: "Rooms", href: "/rooms" },
-                { name: "Things to do", href: "/things-to-do" },
+                { name: "Local Activities", href: "/local-activities" },
                 { name: "Breakfast Menu", href: "/breakfast-menu" },
               ].map((link, index) => (
                 <li key={index}>

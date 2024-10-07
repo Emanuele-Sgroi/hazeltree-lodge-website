@@ -124,7 +124,10 @@ const Header = () => {
             ROOMS
           </Link>
           <span className="header-separator"></span>
-          <Link className={getLinkClass("/things-to-do")} href="/things-to-do">
+          <Link
+            className={getLinkClass("/local-activities")}
+            href="/local-activities"
+          >
             LOCAL ACTIVITIES
           </Link>
           <span className="header-separator"></span>

@@ -29,11 +29,11 @@ const PageTopSection = ({ bgImage, title, description }) => {
       {/* Header component at the top of the page */}
       <Header />
       {/* Spacer for small screens to ensure proper spacing */}
-      <div className="md:hidden h-[80px]" />
+      <div className="md:hidden h-[62px]" />
 
       {/* Background image section */}
       <div
-        className="w-full h-[300px] md:h-[400px] bg-cover bg-center bg-no-repeat relative"
+        className="w-full h-[200px] md:h-[400px] bg-cover bg-center bg-no-repeat relative"
         style={{
           backgroundImage: `url(${bgImage})`,
         }}
@@ -42,7 +42,7 @@ const PageTopSection = ({ bgImage, title, description }) => {
         <div className="overlay-layer"></div>
 
         {/* Centered title and description */}
-        <div className="w-full h-full flex flex-col justify-center items-center text-center p-6">
+        <div className="w-full h-full flex flex-col justify-center items-center text-center px-4 py-6">
           <h1 className="max-w-[800px] z-20">{title}</h1>
           <p className="max-w-[700px] font-light text-white mt-3 z-20">
             {description}

@@ -302,10 +302,10 @@ p {
   background: linear-gradient(
     180deg,
     rgba(84, 84, 95, 0.75) 0%,
-    rgba(24, 24, 31, 0.466) 50%,
-    rgba(50, 54, 78, 0.4) 100%
+    rgba(24, 24, 31, 0.6) 50%,
+    rgba(50, 54, 78, 0.544) 100%
   );
-  filter: brightness(1.02) sepia(0.2);
+  filter: brightness(1.01) sepia(0.2);
   pointer-events: none;
   z-index: 1;
 }

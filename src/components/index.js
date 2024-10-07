@@ -13,7 +13,7 @@ export { default as PageTopSection } from "./PageTopSection/PageTopSection";
 export { default as HeroSection } from "./Homepage/HeroSection";
 export { default as AboutSection } from "./Homepage/AboutSection";
 export { default as OverviewSection } from "./Homepage/OverviewSection";
-export { default as ThingsToDoSection } from "./Homepage/ThingsToDoSection";
+export { default as LocalActivitiesSection } from "./Homepage/LocalActivitiesSection";
 export { default as TestimonialSection } from "./Homepage/TestimonialSection";
 export { default as LocationSection } from "./Homepage/LocationSection";
 export { default as FinalSection } from "./Homepage/FinalSection";
@@ -23,8 +23,8 @@ export { default as VisionSection } from "./AboutPage/VisionSection";
 export { default as MainSection } from "./AboutPage/MainSection";
 export { default as BottomSection } from "./AboutPage/BottomSection";
 
-//Things To Do Page
-export { default as ThingsToDoComponent } from "./ThingsToDoPage/ThingsToDoComponent";
+//Local Activities Page
+export { default as LocalActivitiesComponent } from "./LocalActivitiesPage/LocalActivitiesComponent";
 
 //Rooms Page
 export { default as RoomsPageComponent } from "./RoomsPage/RoomsPageComponent";

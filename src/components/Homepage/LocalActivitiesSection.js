@@ -1,6 +1,6 @@
 /**
- * @file ThingsToDoSection.js
- * @description Renders the "Things To Do" section of the homepage, showcasing activities and attractions around the location. It handles dynamic image loading based on screen size and includes a decorative wave shape element.
+ * @file LocalActivitiesSection.js
+ * @description Renders the Local Activities section of the homepage, showcasing activities and attractions around the location. It handles dynamic image loading based on screen size and includes a decorative wave shape element.
  * @author
  * Emanuele Sgroi
  * @date 20 August 2024
@@ -15,13 +15,13 @@ import { getOptimizedImageUrl } from "@/utils/imageUtils";
 import { LiaLongArrowAltRightSolid } from "react-icons/lia";
 
 /**
- * ThingsToDoSection Component
+ * LocalActivitiesSection Component
  *
- * Displays an introduction to local activities with a link to the "Things to Do" page. The background image dynamically changes based on screen size.
+ * Displays an introduction to local activities with a link to the "Local Activities" page. The background image dynamically changes based on screen size.
  *
- * @returns {JSX.Element} The rendered ThingsToDoSection component.
+ * @returns {JSX.Element} The rendered LocalActivitiesSection component.
  */
-const ThingsToDoSection = () => {
+const LocalActivitiesSection = () => {
   const { homepage } = useSiteContent();
   const [isMobile, setIsMobile] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -94,7 +94,7 @@ const ThingsToDoSection = () => {
                 ))}
             </div>
             <div className="w-[60%] z-20">
-              <Link href="/things-to-do">
+              <Link href="/local-activities">
                 <button className="btn_secondary">
                   <p className="btn_secondary_text" style={{ color: "#fff" }}>
                     VISIT
@@ -154,4 +154,4 @@ const ThingsToDoSection = () => {
   );
 };
 
-export default ThingsToDoSection;
+export default LocalActivitiesSection;

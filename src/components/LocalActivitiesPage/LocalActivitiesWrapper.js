@@ -1,6 +1,6 @@
 /**
- * @file ThingsToDoWrapper.js
- * @description Renders the Things to Do (Activities) page. This page displays various activities that users can engage in during their stay. It includes a top section with a background image, title, and description, and then lists the activities fetched from the CMS (referred to as "activities" in the CMS).
+ * @file LocalActivitiesWrapper.js
+ * @description Renders the Local Activities page. This page displays various activities that users can engage in during their stay. It includes a top section with a background image, title, and description, and then lists the activities fetched from the CMS (referred to as "activities" in the CMS).
  * @author
  * Emanuele Sgroi
  * @date 20 August 2024
@@ -10,19 +10,19 @@
 
 import React from "react";
 import { useActivitiesContent } from "@/hooks/useActivitiesContent";
-import { PageTopSection, ThingsToDoComponent } from "@/components";
+import { PageTopSection, LocalActivitiesComponent } from "@/components";
 import { getAssetUrl } from "@/utils/imageUtils";
 
 /**
- * ThingsToDoWrapper Component
+ * LocalActivitiesWrapper Component
  *
- * This component handles the display of the Things to Do (Activities) page.
+ * This component handles the display of the Local Activities page.
  * It fetches the content from the CMS and renders the top section with a background image,
  * title, and description. It then displays a list of activities retrieved from the CMS.
  *
- * @returns {JSX.Element} The rendered Things to Do page.
+ * @returns {JSX.Element} The rendered Local Activities page.
  */
-const ThingsToDoWrapper = () => {
+const LocalActivitiesWrapper = () => {
   const { content, isLoading, isError } = useActivitiesContent();
 
   // If content is a React component (loading or error), render it directly
@@ -47,9 +47,9 @@ const ThingsToDoWrapper = () => {
         title={content.topSectionTitle}
         description={content.topSectionDescription}
       />
-      <ThingsToDoComponent activities={activitiesRef} />
+      <LocalActivitiesComponent activities={activitiesRef} />
     </div>
   );
 };
 
-export default ThingsToDoWrapper;
+export default LocalActivitiesWrapper;

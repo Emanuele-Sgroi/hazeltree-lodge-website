@@ -1,6 +1,6 @@
 /**
- * @file ThingsToDoComponent.js
- * @description Renders the "Things to Do" section, displaying categorized activities with pagination. Allows users to filter activities by category and navigate through paginated results. The component adapts to mobile and desktop views, providing a dropdown on mobile for category selection.
+ * @file LocalActivitiesComponent.js
+ * @description Renders the "Local Activities" section, displaying categorized activities with pagination. Allows users to filter activities by category and navigate through paginated results. The component adapts to mobile and desktop views, providing a dropdown on mobile for category selection.
  * @author
  * Emanuele Sgroi
  * @date 20 August 2024
@@ -22,15 +22,15 @@ import {
 } from "@/components/ui/select";
 
 /**
- * ThingsToDoComponent
+ * LocalActivitiesComponent
  *
  * Displays a list of activities, filtered by categories, with pagination controls for navigating through multiple activities.
  * It supports both mobile and desktop views, with a category dropdown on mobile and a set of buttons for desktop.
  *
  * @param {Object[]} activities - List of activities to display.
- * @returns {JSX.Element} The rendered Things to Do section.
+ * @returns {JSX.Element} The rendered Local Activities section.
  */
-const ThingsToDoComponent = ({ activities }) => {
+const LocalActivitiesComponent = ({ activities }) => {
   // State variables to manage categories, pagination, and transitions
   const [categoryActive, setCategoryActive] = useState("View All");
   const [categoryName, setCategoryName] = useState("View All");
@@ -287,4 +287,4 @@ const ThingsToDoComponent = ({ activities }) => {
   );
 };
 
-export default ThingsToDoComponent;
+export default LocalActivitiesComponent;

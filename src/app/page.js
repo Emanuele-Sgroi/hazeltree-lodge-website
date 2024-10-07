@@ -10,7 +10,7 @@ import {
   HeroSection,
   AboutSection,
   OverviewSection,
-  ThingsToDoSection,
+  LocalActivitiesSection,
   TestimonialSection,
   FinalSection,
   LocationSection,
@@ -71,8 +71,8 @@ export default function Home() {
       {/* Testimonial section showcases guest reviews */}
       <TestimonialSection />
 
-      {/* Things To Do section introduces nearby attractions and activities */}
-      <ThingsToDoSection />
+      {/* Local Activities section introduces nearby attractions and activities */}
+      <LocalActivitiesSection />
 
       {/* Location section displays the lodge's location in google map */}
       <LocationSection />
