@@ -115,17 +115,17 @@ const Header = () => {
           <Link className={getLinkClass("/")} href="/">
             HOME
           </Link>
-          <span className="header-separator"></span>
+          {/* <span className="header-separator"></span>
           <Link className={getLinkClass("/about")} href="/about">
             ABOUT
-          </Link>
+          </Link> */}
           <span className="header-separator"></span>
           <Link className={getLinkClass("/rooms")} href="/rooms">
             ROOMS
           </Link>
           <span className="header-separator"></span>
           <Link className={getLinkClass("/things-to-do")} href="/things-to-do">
-            THINGS TO DO
+            LOCAL ACTIVITIES
           </Link>
           <span className="header-separator"></span>
           <Link className={getLinkClass("/contact")} href="/contact">

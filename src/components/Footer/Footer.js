@@ -94,7 +94,7 @@ const Footer = () => {
             <ul className="flex flex-col gap-4">
               {[
                 { name: "Book Now", href: "/booking" },
-                { name: "About", href: "/about" },
+                // { name: "About", href: "/about" },
                 { name: "Rooms", href: "/rooms" },
                 { name: "Things to do", href: "/things-to-do" },
                 { name: "Breakfast Menu", href: "/breakfast-menu" },

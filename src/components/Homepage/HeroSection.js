@@ -151,7 +151,7 @@ const HeroSection = () => {
 
         {/* Scroll Down Indicator */}
         <ScrollLink
-          to="about-section"
+          to="overview-section"
           smooth={true}
           duration={1000}
           offset={offset}

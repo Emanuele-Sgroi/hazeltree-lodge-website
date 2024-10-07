@@ -63,7 +63,7 @@ export default function Home() {
       <HeroSection />
 
       {/* About section */}
-      <AboutSection />
+      {/* <AboutSection /> */}
 
       {/* Overview section highlights rooms, common areas and amenities */}
       <OverviewSection />

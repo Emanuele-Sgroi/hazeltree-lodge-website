@@ -65,7 +65,7 @@ const SideMenu = ({ isMenuOpen, onClick }) => {
           <ul className="flex flex-col gap-3">
             {[
               { href: "/", text: "Home" },
-              { href: "/about", text: "About" },
+              // { href: "/about", text: "About" },
               { href: "/rooms", text: "Rooms" },
               { href: "/things-to-do", text: "Things to do" },
             ].map((link) => (

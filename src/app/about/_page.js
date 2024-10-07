@@ -1,4 +1,5 @@
 /**
+ * @status TEMPORARY DISABLED
  * @file page.js
  * @description Renders the About Us page, providing information about the establishment and its offerings.
  * @author
