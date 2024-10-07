@@ -2,9 +2,7 @@
 
 ## Project Overview
 
-The **Hazeltree Lodge** website serves as the primary platform for a Bed & Breakfast (B&B), offering key functionalities such as room browsing, booking, inquiries, and payments. This project ensures a smooth user experience with an integrated booking system, a CMS for easy content management, and secure payment processing.
-
-You can view the live demo here: [Live Demo](https://www.hazeltreelodge.com)
+This is the mai nrepository for hazeltree Lodge website.
 
 ## Tech Stack
 
@@ -16,6 +14,8 @@ This project is built using the following technologies:
 - **Beds24**: Used to manage room availability, pricing, and bookings.
 - **Contentful**: A CMS to easily update website content such as text, images and more.
 
+Note: You can only clone this repository if you grantet access.
+
 ## Installation and Setup
 
 To set up the project locally, follow these steps:
@@ -23,7 +23,7 @@ To set up the project locally, follow these steps:
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/Emanuele-Sgroi/hazeltree-lodge-website.git
+   git clone [https://github.com/Emanuele-Sgroi/hazeltree-lodge-website.git](https://github.com/Emanuele-Sgroi/Hazeltree-Lodge.git)
    ```
 
 2. **Navigate to the project directory**:
@@ -69,17 +69,3 @@ To use the project:
   ```bash
   npm run dev
   ```
-
-- **Contentful CMS**: The CMS is custom-built for Hazeltree Lodge. To view or manage content, check the hooks in the code that are related to the CMS structure. If you prefer working with static content, you can disable API calls temporarily and substitute static content in the UI.
-
-## Deployment
-
-This project is optimized for deployment on **Vercel**. To deploy:
-
-1. Connect the repository to your Vercel account.
-2. Deploy directly through Vercel's deployment system.
-3. No special configurations are needed for Vercel.
-
-## License
-
-This project is licensed under a custom MIT License. It allows non-commercial use, modification, and distribution, provided that proper attribution is given to the original developer, **Emanuele Sgroi** and conditions are met. For more details, see the `LICENSE` file.
