@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is the mai nrepository for hazeltree Lodge website.
+This is the main repository for hazeltree Lodge website.
 
 ## Tech Stack
 
