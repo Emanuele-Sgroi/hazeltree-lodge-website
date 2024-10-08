@@ -246,8 +246,8 @@ const RoomCard = ({
                 <div className="flex gap-1 items-start">
                   <span className="relative text-s xl:text-base font-normal text-accent-green">
                     Up to {cmsRoom.roomMaxGuests} guests |{" "}
-                    {cmsRoom.roomSizeSquareMeters}
-                    m&sup2;{" "}
+                    {/* {cmsRoom.roomSizeSquareMeters}
+                    m&sup2; */}
                     {cmsRoom.roomEnsuite ? "| Ensuite" : "| Dedicated bathroom"}
                     {cmsRoom.roomTipText && cmsRoom.roomTipText.length > 0 && (
                       <>

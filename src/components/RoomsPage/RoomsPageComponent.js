@@ -153,8 +153,8 @@ const RoomsPageComponent = ({ rooms }) => {
                   ))}
                   <div className="relative flex gap-1 items-start">
                     <span className="text-base font-normal text-accent-green">
-                      Up to {room.roomMaxGuests} guests |{" "}
-                      {room.roomSizeSquareMeters}m&sup2;{" "}
+                      Up to {room.roomMaxGuests} guests{" "}
+                      {/* {room.roomSizeSquareMeters}m&sup2; */}
                       {room.roomEnsuite ? "| Ensuite" : "| Dedicated bathroom"}
                       {room.roomTipText && room.roomTipText.length > 0 && (
                         <>
