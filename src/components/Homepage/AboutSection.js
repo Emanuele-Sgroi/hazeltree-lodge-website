@@ -50,7 +50,7 @@ const AboutSection = () => {
 
           {/* Action Buttons */}
           <div className="w-[60%] relative flex flex-col gap-3 z-20">
-            <ButtonSecondary text="EXPLORE MORE" href="/about" />
+            {/* <ButtonSecondary text="EXPLORE MORE" href="/about" /> */}
             <ButtonSecondary text="BOOK A ROOM" href="/booking" />
           </div>
 

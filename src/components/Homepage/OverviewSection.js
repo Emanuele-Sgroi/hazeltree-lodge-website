@@ -140,7 +140,7 @@ const OverviewSection = () => {
   return (
     <section
       id="overview-section"
-      className="relative w-full bg-primary py-12 md:py-16 lg:py-20 overflow-hidden"
+      className="relative w-full bg-secondary py-12 md:py-16 lg:py-20 overflow-hidden"
     >
       <div className="w-full flex flex-col items-center">
         <div className="flex flex-col justify-center items-center gap-2 max-w-[770px] px-4">
@@ -359,7 +359,7 @@ const OverviewSection = () => {
         {/* Amenities Section */}
         <div className="w-full flex justify-center px-4 lg:px-8 pt-16 md:pt-20 lg:pt-24">
           <div className="relative flex justify-center flex-wrap gap-8 lg:gap-20 border-[#2e377833] border py-8 px-8 md:px-12">
-            <h5 className="absolute -top-4 text-[#101838] bg-primary  px-4">
+            <h5 className="absolute -top-4 text-[#101838] bg-secondary  px-4">
               {homepage.overviewSectionAmenitiesTitle.toUpperCase()}
             </h5>
             {amenities.map((amenity, index) => (
