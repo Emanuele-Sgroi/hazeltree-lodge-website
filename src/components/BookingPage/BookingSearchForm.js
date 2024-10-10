@@ -585,9 +585,9 @@ const BookingSearchForm = ({
             className={` max-md:max-w-[99%] lg:min-w-[945px] overflow-hidden  max-h-[95vh] h-fit lg:h-[680px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-primary z-[9999] shadow-lg rounded outline-none focus:outline-none transition-all duration-200 ease-in-out px-4 ${
               isAnimating ? "opacity-100 scale-100" : "opacity-0 scale-95"
             }`}
-            overlayClassName="fixed min-h-svh bg-[#000000bf] backdrop-blur-[2px] top-0 left-0 bottom-0 right-0 z-[9999] transition-opacity duration-200 ease-in-out"
+            overlayClassName="fixed inset-0 bg-[#000000bf] backdrop-blur-[2px] z-[999] transition-opacity duration-200 ease-in-out"
           >
-            <div className="w-full h-full flex flex-col items-center justify-between relative overflow-auto">
+            <div className="w-full h-full flex flex-col items-center justify-between relative overflow-auto z-[9999]">
               <div className="w-full pt-4 mb-6 flex justify-end">
                 <button onClick={closeCalendarModal}>
                   <IoClose size={25} />
