@@ -357,21 +357,24 @@ const OverviewSection = () => {
         </div>
 
         {/* Amenities Section */}
-        <div className="w-full flex justify-center px-4 lg:px-8 pt-16 md:pt-20 lg:pt-24">
-          <div className="relative flex justify-center flex-wrap gap-8 lg:gap-20 border-[#2e377833] border py-8 px-8 md:px-12">
-            <h5 className="absolute -top-4 text-[#101838] bg-secondary  px-4">
+        <div className="w-full flex justify-center px-4 lg:px-32 pt-16 md:pt-20 lg:pt-24">
+          <div className="relative flex flex-col sm:flex-row justify-center sm:flex-wrap gap-4 lg:gap-6 border-[#2e377833] border py-8 px-8 md:px-12">
+            <h5 className="absolute max-sm:w-[95%] -top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#101838] bg-secondary text-center  px-4">
               {homepage.overviewSectionAmenitiesTitle.toUpperCase()}
             </h5>
             {amenities.map((amenity, index) => (
-              <div key={index} className="flex items-end gap-2">
+              <div
+                key={index}
+                className="flex flex-col sm:flex-row items-center sm:items-end gap-2 mx-3 lg:mt-2"
+              >
                 <Image
                   src={getAssetUrl(amenity.amenityIcon)}
                   alt={`${amenity.amenityName} icon`}
                   width={35}
                   height={35}
-                  className="max-md:w-[30px] max-md:h-[30px]"
+                  className=""
                 />
-                <p>{amenity.amenityName}</p>
+                <p className="max-sm:text-center">{amenity.amenityName}</p>
               </div>
             ))}
           </div>
