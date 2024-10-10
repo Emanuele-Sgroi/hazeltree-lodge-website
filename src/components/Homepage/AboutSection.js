@@ -46,7 +46,14 @@ const AboutSection = () => {
           </div>
 
           {/* Description */}
-          <p>{homepage.aboutSectionDescription}</p>
+          {/* <p>{homepage.aboutSectionDescription}</p> */}
+          <div className="flex flex-col justify-start gap-4 z-20">
+            {homepage.aboutSectionDescription.split("\n").map((line, index) => (
+              <p key={index} className="text-left">
+                {line}
+              </p>
+            ))}
+          </div>
 
           {/* Action Buttons */}
           <div className="w-[60%] relative flex flex-col gap-3 z-20">
