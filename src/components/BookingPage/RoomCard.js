@@ -34,6 +34,11 @@ import { BLOCKS, MARKS } from "@contentful/rich-text-types";
 import { v4 as uuidv4 } from "uuid"; // Import uuid
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useTempBooking } from "@/hooks/useTempBooking";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 // Rich text rendering options for Contentful content
 const options = {
@@ -96,6 +101,7 @@ const RoomCard = ({
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isTooltip, setIsTooltip] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const router = useRouter(); // Initialize router
 
@@ -177,6 +183,18 @@ const RoomCard = ({
     }
   };
 
+  // Handle responsive behavior for mobile devices
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   // Set modal container in DOM
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -245,7 +263,7 @@ const RoomCard = ({
 
                 <div className="flex gap-1 items-start">
                   <span className="relative text-s xl:text-base font-normal text-accent-green">
-                    Up to {cmsRoom.roomMaxGuests} guests |{" "}
+                    Up to {cmsRoom.roomMaxGuests} guests{" "}
                     {/* {cmsRoom.roomSizeSquareMeters}
                     m&sup2; */}
                     {cmsRoom.roomEnsuite ? "| Ensuite" : "| Dedicated bathroom"}
@@ -281,30 +299,59 @@ const RoomCard = ({
                   </span>
                 </div>
                 <div className="flex gap-3 mt-2 sm:mt-3">
-                  {amenities &&
-                    amenities.length > 0 &&
-                    amenities.map((amenity, index) => (
-                      <TooltipProvider delayDuration={400} key={index}>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            {amenity?.amenityIcon && (
-                              <Image
-                                src={getAssetUrl(amenity.amenityIcon)}
-                                alt={`${amenity.amenityName} icon`}
-                                width={25}
-                                height={25}
-                                className="w-[25px] h-[25px]"
-                              />
-                            )}
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="text-s text-black font-light">
-                              {amenity?.amenityName}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ))}
+                  {!isMobile ? (
+                    <>
+                      {amenities &&
+                        amenities.length > 0 &&
+                        amenities.map((amenity, index) => (
+                          <TooltipProvider delayDuration={400} key={index}>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                {amenity?.amenityIcon && (
+                                  <Image
+                                    src={getAssetUrl(amenity.amenityIcon)}
+                                    alt={`${amenity.amenityName} icon`}
+                                    width={25}
+                                    height={25}
+                                    className="w-[25px] h-[25px]"
+                                  />
+                                )}
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-s text-black font-light">
+                                  {amenity?.amenityName}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ))}
+                    </>
+                  ) : (
+                    <>
+                      {amenities &&
+                        amenities.length > 0 &&
+                        amenities.map((amenity, index) => (
+                          <Popover key={index}>
+                            <PopoverTrigger asChild>
+                              {amenity?.amenityIcon && (
+                                <Image
+                                  src={getAssetUrl(amenity.amenityIcon)}
+                                  alt={`${amenity.amenityName} icon`}
+                                  width={25}
+                                  height={25}
+                                  className="w-[25px] h-[25px]"
+                                />
+                              )}
+                            </PopoverTrigger>
+                            <PopoverContent className="w-fit p-1">
+                              <p className="text-s text-black font-light">
+                                {amenity?.amenityName}
+                              </p>
+                            </PopoverContent>
+                          </Popover>
+                        ))}
+                    </>
+                  )}
                 </div>
                 <RoomDescription description={cmsRoom.roomMainDescription} />
                 <button

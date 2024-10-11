@@ -24,6 +24,10 @@ import {
   isSameDay,
   setHours,
   setMinutes,
+  isBefore,
+  startOfDay,
+  differenceInCalendarMonths,
+  addMonths,
 } from "date-fns";
 import Modal from "react-modal";
 import classNames from "classnames";
@@ -40,6 +44,24 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import Loading from "@/components/Loading/Loading";
+
+import { Calendar as CalendarIcon } from "lucide-react";
+import { DateRange } from "react-day-picker";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 /**
  * BookingSearchForm Component
@@ -164,6 +186,11 @@ const BookingSearchForm = ({
 
   // Calculate the max check-in date
   const maxCheckinDate = addDays(maxBookingDate, -0);
+
+  //total months for datapicker
+  //const totalMonths = differenceInCalendarMonths(maxCheckinDate, today) + 1;
+  const totalMonths =
+    differenceInCalendarMonths(addMonths(today, 36), today) + 1;
 
   // disable dates that are not available
   const isDateDisabled = (date) => {
@@ -408,35 +435,103 @@ const BookingSearchForm = ({
         <div className="w-full flex justify-center">
           <div className="max-md:w-full flex flex-wrap justify-start md:justify-center max-[425px]:flex-col gap-4 min-[426px]:gap-8 p-4 border-[#2e377833] border rounded-md">
             {/* Calendar Icon + Check-in and Check-out Dates */}
-            <div
-              className="flex max-[425px]:hidden items-center space-x-2  cursor-pointer text-dark-blue"
-              onClick={openCalendarModal}
-            >
-              <MdOutlineCalendarMonth className="text-accent-green" size={22} />
-              <span>{formattedStartDate}</span>
-              <LiaLongArrowAltRightSolid className="text-dark-blue" size={22} />
-              <span>{formattedEndDate}</span>
-            </div>
-            {/*Check-in and Check-out Dates - MOBILE */}
-            <div
-              className="flex flex-col min-[426px]:hidden items-start justify-center gap-4 cursor-pointer text-dark-blue"
-              onClick={openCalendarModal}
-            >
-              <div className="flex gap-2">
+            {!isMobile ? (
+              <div
+                className="flex max-[425px]:hidden items-center space-x-2  cursor-pointer text-dark-blue"
+                onClick={openCalendarModal}
+              >
                 <MdOutlineCalendarMonth
                   className="text-accent-green"
                   size={22}
                 />
-                <span>From: {formattedStartDate}</span>
-              </div>
-              <div className="flex gap-2">
-                <MdOutlineCalendarMonth
-                  className="text-accent-green"
+                <span>{formattedStartDate}</span>
+                <LiaLongArrowAltRightSolid
+                  className="text-dark-blue"
                   size={22}
                 />
-                <span>To: {formattedEndDate}</span>
+                <span>{formattedEndDate}</span>
               </div>
-            </div>
+            ) : (
+              <Drawer>
+                <DrawerTrigger className="flex flex-col min-[400px]:flex-row min-[400px]:items-center gap-2">
+                  <div className="flex gap-2 items-center">
+                    <MdOutlineCalendarMonth
+                      className="text-accent-green"
+                      size={22}
+                    />
+                    <span>{formattedStartDate}</span>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <MdOutlineCalendarMonth
+                      className="text-accent-green min-[400px]:hidden"
+                      size={22}
+                    />
+                    <LiaLongArrowAltRightSolid
+                      className="text-dark-blue max-[399px]:hidden"
+                      size={22}
+                    />
+                    <span>{formattedEndDate}</span>
+                  </div>
+                </DrawerTrigger>
+                <DrawerContent className=" h-[86svh] z-[99999]">
+                  <DrawerHeader>
+                    <DrawerTitle>
+                      <h4>Select Dates</h4>
+                    </DrawerTitle>
+                  </DrawerHeader>
+                  <div className="relative w-full h-full overflow-scroll border-t border-t-[#101838] border-b border-b-[#101838] border-opacity-20 ">
+                    <DatePicker
+                      locale="en-GB" // Set locale to start the week on Monday
+                      selected={startDate}
+                      onChange={handleDateChange} // Handle date changes
+                      startDate={startDate}
+                      endDate={endDate}
+                      selectsRange
+                      inline
+                      //  monthsShown={isMobile ? 1 : 2}
+                      monthsShown={isMobile ? totalMonths : 2}
+                      minDate={new Date()} // Prevent selecting past dates
+                      maxDate={maxCheckinDate} // Limit the latest date for check-in
+                      renderDayContents={renderDayContents} // Display prices
+                      filterDate={(date) => !isDateDisabled(date)} // Disable unavailable and past dates
+                    />
+                  </div>
+                  <DrawerFooter>
+                    <div className="relative w-full  mb-3 flex flex-col items-center z-[99999]">
+                      {showPrices && <p className="text-center">{infoText}</p>}
+                      {showPrices && (
+                        <div className="w-full h-px bg-[#2e3778] bg-opacity-20 mt-4"></div>
+                      )}
+                      <div className="w-full flex justify-between items-end mt-1 ">
+                        <div>
+                          <p className="text-accent-green">
+                            <span className="font-heavy">{nightsCount}</span>{" "}
+                            {nightsCount === 1 ? "Night" : "Nights"} Selected
+                          </p>
+                          <div className="flex items-center gap-1 text-error-text">
+                            <PiWarningCircle size={15} />
+                            <p className="text-s">
+                              Max. Stay{" "}
+                              <span className="font-heavy">{maxStay}</span>{" "}
+                              Nights
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleClearDates}
+                          className="font-heavy transform active:scale-95"
+                        >
+                          CLEAR DATES
+                        </button>
+                      </div>
+                    </div>
+                    <DrawerClose asChild>
+                      <Button className="bg-accent-green">Select Dates</Button>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </DrawerContent>
+              </Drawer>
+            )}
             {/* Nights Icon + Nights Number */}
             <div className="flex items-center space-x-2 ">
               <IoMoonOutline className="text-accent-green" size={22} />
@@ -582,12 +677,12 @@ const BookingSearchForm = ({
             isOpen={isCalendarModalOpen}
             onRequestClose={closeCalendarModal}
             ariaHideApp={false}
-            className={` max-md:max-w-[99%] lg:min-w-[945px] overflow-hidden  max-h-[95vh] h-fit lg:h-[680px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-primary z-[9999] shadow-lg rounded outline-none focus:outline-none transition-all duration-200 ease-in-out px-4 ${
+            className={`fixed inset-0 z-50 flex items-center justify-center px-4 ${
               isAnimating ? "opacity-100 scale-100" : "opacity-0 scale-95"
             }`}
-            overlayClassName="fixed inset-0 bg-[#000000bf] backdrop-blur-[2px] z-[999] transition-opacity duration-200 ease-in-out"
+            overlayClassName="fixed inset-0 bg-[#000000bf] z-40 transition-opacity duration-200 ease-in-out z-[9999]"
           >
-            <div className="w-full h-full flex flex-col items-center justify-between relative overflow-auto z-[9999]">
+            <div className="bg-primary flex flex-col max-w-[99%] lg:min-w-[945px] max-h-[95vh] h-fit lg:h-[680px] overflow-hidden shadow-lg rounded outline-none focus:outline-none transition-all duration-200 ease-in-out px-4">
               <div className="w-full pt-4 mb-6 flex justify-end">
                 <button onClick={closeCalendarModal}>
                   <IoClose size={25} />
@@ -602,14 +697,15 @@ const BookingSearchForm = ({
                   endDate={endDate}
                   selectsRange
                   inline
-                  monthsShown={isMobile ? 1 : 2}
+                  //  monthsShown={isMobile ? 1 : 2}
+                  monthsShown={isMobile ? totalMonths : 2}
                   minDate={new Date()} // Prevent selecting past dates
                   maxDate={maxCheckinDate} // Limit the latest date for check-in
                   renderDayContents={renderDayContents} // Display prices
                   filterDate={(date) => !isDateDisabled(date)} // Disable unavailable and past dates
                 />
               </div>
-              <div className="w-full mt-4 md:mt-6 pb-4 md:px-8 flex flex-col items-center">
+              <div className="relative w-full mt-4 md:mt-6 pb-4 md:px-8 flex flex-col items-center z-[99999]">
                 {showPrices && <p className="text-center">{infoText}</p>}
 
                 <div className="w-full flex justify-between items-end border-t border-t-[#2e3778] border-opacity-20 mt-4 pt-4">

@@ -13,6 +13,7 @@
     "@contentful/rich-text-react-renderer": "^15.22.9",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
+    "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-select": "^2.1.1",
@@ -38,6 +39,7 @@
     "node-fetch": "^3.3.2",
     "react": "^18",
     "react-datepicker": "^7.3.0",
+    "react-day-picker": "^8.10.1",
     "react-dom": "^18",
     "react-hook-form": "^7.53.0",
     "react-icons": "^5.2.1",
@@ -56,6 +58,7 @@
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^10.0.0",
+    "vaul": "^1.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
