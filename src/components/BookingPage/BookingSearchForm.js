@@ -170,8 +170,8 @@ const BookingSearchForm = ({
     if (initialSearchData) {
       setStartDate(new Date(initialSearchData.checkIn));
       setEndDate(new Date(initialSearchData.checkOut));
-      setRoomsCount(initialSearchData.totalRoomsNumber);
-      setGuestsCount(initialSearchData.totalGuestsNumber);
+      // setRoomsCount(initialSearchData.totalRoomsNumber);
+      //  setGuestsCount(initialSearchData.totalGuestsNumber);
       setNightsCount(initialSearchData.nightsCount);
     }
   }, [initialSearchData]);
@@ -316,59 +316,59 @@ const BookingSearchForm = ({
   };
 
   // Decrease rooms count
-  const decreaseRooms = () => {
-    setRoomsCount((prev) => Math.max(1, prev - 1));
-  };
+  // const decreaseRooms = () => {
+  //   setRoomsCount((prev) => Math.max(1, prev - 1));
+  // };
 
-  // Increase rooms count
-  const increaseRooms = () => {
-    setRoomsCount((prev) => Math.min(maxRooms, prev + 1));
-  };
+  // // Increase rooms count
+  // const increaseRooms = () => {
+  //   setRoomsCount((prev) => Math.min(maxRooms, prev + 1));
+  // };
 
   // Adjust the maximum guests based on room count
-  const getMaxGuestsForRooms = (roomsCount) => {
-    if (roomsCount === 1) return 4;
-    if (roomsCount === 2) return 6;
-    return 8; // If 3 rooms are selected, max 8 guests
-  };
+  // const getMaxGuestsForRooms = (roomsCount) => {
+  //   if (roomsCount === 1) return 4;
+  //   if (roomsCount === 2) return 6;
+  //   return 8; // If 3 rooms are selected, max 8 guests
+  // };
 
   // Adjust the minimum guests based on room count
-  const getMinGuestsForRooms = (roomsCount) => {
-    if (roomsCount === 1) return 1;
-    if (roomsCount === 2) return 2;
-    return 3; // If 3 rooms are selected, max 8 guests
-  };
+  // const getMinGuestsForRooms = (roomsCount) => {
+  //   if (roomsCount === 1) return 1;
+  //   if (roomsCount === 2) return 2;
+  //   return 3; // If 3 rooms are selected, max 8 guests
+  // };
 
   // Decrease guests count
-  const decreaseGuests = () => {
-    setGuestsCount((prev) => Math.max(1, prev - 1));
-  };
+  // const decreaseGuests = () => {
+  //   setGuestsCount((prev) => Math.max(1, prev - 1));
+  // };
 
-  // Increase guests count with dynamic limit based on roomsCount
-  const increaseGuests = () => {
-    const maxGuestsForRooms = getMaxGuestsForRooms(roomsCount);
-    setGuestsCount((prev) => Math.min(maxGuestsForRooms, prev + 1));
-  };
+  // // Increase guests count with dynamic limit based on roomsCount
+  // const increaseGuests = () => {
+  //   const maxGuestsForRooms = getMaxGuestsForRooms(roomsCount);
+  //   setGuestsCount((prev) => Math.min(maxGuestsForRooms, prev + 1));
+  // };
 
-  // Update guests limit dynamically when rooms count changes
-  useEffect(() => {
-    const maxGuestsForRooms = getMaxGuestsForRooms(roomsCount);
-    if (guestsCount > maxGuestsForRooms) {
-      setGuestsCount(maxGuestsForRooms); // Adjust guests down if over the limit
-    }
-  }, [roomsCount]);
+  // // Update guests limit dynamically when rooms count changes
+  // useEffect(() => {
+  //   const maxGuestsForRooms = getMaxGuestsForRooms(roomsCount);
+  //   if (guestsCount > maxGuestsForRooms) {
+  //     setGuestsCount(maxGuestsForRooms); // Adjust guests down if over the limit
+  //   }
+  // }, [roomsCount]);
 
-  useEffect(() => {
-    const minGuestsForRooms = getMinGuestsForRooms(roomsCount);
-    if (guestsCount < minGuestsForRooms) {
-      setGuestsCount(minGuestsForRooms); // Adjust guests up if below the limit
-      // setMinGuestsCount(roomsCount);
-    }
-  }, [roomsCount]);
+  // useEffect(() => {
+  //   const minGuestsForRooms = getMinGuestsForRooms(roomsCount);
+  //   if (guestsCount < minGuestsForRooms) {
+  //     setGuestsCount(minGuestsForRooms); // Adjust guests up if below the limit
+  //     // setMinGuestsCount(roomsCount);
+  //   }
+  // }, [roomsCount]);
 
-  // Calculate total guests and rooms for display
-  const totalGuestsNumber = guestsCount;
-  const totalRoomsNumber = roomsCount;
+  // // Calculate total guests and rooms for display
+  // const totalGuestsNumber = guestsCount;
+  // const totalRoomsNumber = roomsCount;
 
   // Handle search button click
   const handleSearchAction = () => {
@@ -381,8 +381,8 @@ const BookingSearchForm = ({
           checkIn: format(startDate, "yyy-MM-dd"),
           checkOut: format(endDate, "yyy-MM-dd"),
           nightsCount,
-          totalGuestsNumber,
-          totalRoomsNumber,
+          //  totalGuestsNumber,
+          //  totalRoomsNumber,
         };
         setIsDateValid(true);
         setIsDateSelected(true);
@@ -541,7 +541,7 @@ const BookingSearchForm = ({
             </div>
 
             {/* Guests and rooms selection */}
-            <Popover onOpenChange={(open) => setIsPopoverOpen(open)}>
+            {/* <Popover onOpenChange={(open) => setIsPopoverOpen(open)}>
               <PopoverTrigger className="flex items-center gap-4 cursor-pointer">
                 <div className="flex gap-2">
                   <IoBedOutline className="text-accent-green" size={22} />
@@ -565,7 +565,7 @@ const BookingSearchForm = ({
               <PopoverContent className="p-4 bg-white shadow-lg rounded-md">
                 <div className="mb-4 border-b border-gray-300 pb-2">
                   {/* Select number of rooms */}
-                  <div className="flex justify-between items-center text-dark-blue mb-4">
+            {/* <div className="flex justify-between items-center text-dark-blue mb-4">
                     <h4 className="text-2xl">Rooms</h4>
                     <div className="min-w-[100px] flex justify-between gap-2 items-center text-dark-blue">
                       <button
@@ -604,10 +604,10 @@ const BookingSearchForm = ({
                         />
                       </button>
                     </div>
-                  </div>
+                  </div> */}
 
-                  {/* Select number of guests */}
-                  <div className="flex justify-between items-center text-dark-blue">
+            {/* Select number of guests */}
+            {/* <div className="flex justify-between items-center text-dark-blue">
                     <h4 className="text-2xl">Guests</h4>
                     <div className="min-w-[100px] flex justify-between gap-2 items-center text-dark-blue">
                       <button
@@ -651,17 +651,17 @@ const BookingSearchForm = ({
                       </button>
                     </div>
                   </div>
-                </div>
+                </div> */}
 
-                {/* Information text */}
-                {showAgeLimitText && (
+            {/* Information text */}
+            {/* {showAgeLimitText && (
                   <p className="text-xs text-gray-500 mt-4 flex items-center gap-1">
                     <PiWarningCircle size={14} />
                     {ageLimitText}
                   </p>
                 )}
               </PopoverContent>
-            </Popover>
+             </Popover>  */}
 
             {/* Search button */}
             <button
