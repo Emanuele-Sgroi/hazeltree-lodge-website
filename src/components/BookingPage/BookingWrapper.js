@@ -20,6 +20,7 @@ import {
 import Image from "next/image";
 import { getAssetUrl } from "@/utils/imageUtils";
 import images from "@/utils/imageImports";
+import { addMonths } from "date-fns";
 
 /**
  * BookingWrapper Component
@@ -37,6 +38,9 @@ const BookingWrapper = () => {
   const [scrollPosition, setScrollPosition] = useState(0); // For parallax effect
   const [searchData, setSearchData] = useState(null); // Store search data
   const [isLoadingSearch, setIsLoadingSearch] = useState(false); // Spinner state
+
+  const maxBookingLimitMonths = content.dataPickerMaxBookingDateInMonths; //Update contentful
+  const maxBookingDate = addMonths(new Date(), maxBookingLimitMonths);
 
   // Group CMS data for the search result
   const cmsResultData = {
@@ -139,8 +143,9 @@ const BookingWrapper = () => {
         maxStay={content.datePickerMaximumStay}
         dayCutoff={content.datePickerDayCutoff}
         maxGuests={content.guestsSelectionMaxGuestsNumber}
+        // Add minimum guests for twin room here
         maxRooms={content.guestsSelectionSelectableRoomsNumber}
-        maxBookingDate={content.datePickerMaxBookingLimit}
+        maxBookingDate={maxBookingDate} // to edit
         guestLabel={content.guestsSelectionGuestLabel}
         showAgeLimitText={content.guestsSelectionShowAgeLimitText}
         ageLimitText={content.guestsSelectionAgeLimitText}

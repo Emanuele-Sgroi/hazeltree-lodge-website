@@ -17,9 +17,6 @@ import BookingWrapper from "@/components/BookingPage/BookingWrapper";
  * @property {Object} openGraph - Open Graph metadata for social sharing.
  */
 
-/**
- * @type {Metadata}
- */
 export const metadata = {
   title: "Book Your Stay | Hazeltree Lodge B&B",
   description:
