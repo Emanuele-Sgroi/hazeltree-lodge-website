@@ -39,6 +39,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useMediaQuery } from "react-responsive";
 
 // Rich text rendering options for Contentful content
 const options = {
@@ -97,89 +105,39 @@ const RoomCard = ({
   setRoomsLeftToSelect,
   isShowingAlternatives,
 }) => {
+  // Initialize guest count with the minimum number of guests for the room
+  const [guestCount, setGuestCount] = useState(
+    cmsRoom.roomMinNumberOfGuests || 1
+  );
   const [isImagesModalOpen, setIsImagesModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isTooltip, setIsTooltip] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const isLargeScreen = useMediaQuery({ minWidth: 1024 });
 
   const router = useRouter(); // Initialize router
 
-  const {
-    checkIn,
-    checkOut,
-    totalGuestsNumber,
-    totalRoomsNumber,
-    nightsCount,
-  } = searchData;
+  const { checkIn, checkOut, nightsCount } = searchData;
+
   const { priceInfo } = cmsResultData;
 
   const amenities = cmsRoom.amenitiesReference?.map(
     (amenity) => amenity.fields
   );
 
-  // Determine booking scenario
-  const isSingleRoomBooking =
-    totalRoomsNumber === 1 && totalGuestsNumber <= cmsRoom.roomMaxGuests;
+  // State to check if the room is already selected
   const isRoomSelected = selectedRooms.some(
     (selectedRoom) => selectedRoom.roomId === apiRoom.roomId
   );
 
   const { createTempBooking, isLoading, error } = useTempBooking(); // Destructure the hook
 
-  const handleBookNow = async () => {
-    const bookingData = [
-      {
-        roomId: apiRoom.roomId,
-        status: "inquiry", // Temporary status
-        arrival: searchData.checkIn, // Check-in date
-        departure: searchData.checkOut, // Check-out date
-        numAdult: searchData.totalGuestsNumber, // Number of guests
-        numChild: 0, // No distinction between children and adults
-      },
-    ];
-
-    // Call the createTempBooking function from the hook
-    const bookingIds = await createTempBooking(bookingData); // Now expects an array
-
-    if (bookingIds && bookingIds.length > 0) {
-      // Generate a unique ID for the checkout session
-      const sessionId = uuidv4();
-
-      // Prepare the full booking data
-      const fullBookingData = {
-        bookingIds, // Always an array
-        searchData, // Keep the existing searchData structure
-        selectedRooms: [apiRoom], // Ensure it's an array with the single room
-        cmsResultData, // Include the cmsResultData (room details, pricing, etc.)
-        timestamp: new Date().getTime(), // Store a timestamp for session expiration
-        totalGuestsNumber: searchData.totalGuestsNumber,
-        totalRoomsNumber: searchData.totalRoomsNumber,
-        nightsCount: searchData.nightsCount,
-        cmsRoom: apiRoom, // Pass the selected room data
-        checkIn: searchData.checkIn,
-        checkOut: searchData.checkOut,
-      };
-
-      // Store the data in sessionStorage with the unique session ID
-      sessionStorage.setItem(
-        `checkout_${sessionId}`,
-        JSON.stringify(fullBookingData)
-      );
-
-      // Redirect to the checkout page with the session ID
-      router.push(`/booking/checkout/${sessionId}`);
-    } else {
-      // console.log("Can't get the booking IDs");
-      // Optionally, handle the error by informing the user
-    }
-  };
-
   // Function for adding the selected room to checkout, in case of multiple rooms selection
   const handleAddToBooking = () => {
-    if (roomsLeftToSelect > 0) {
-      setSelectedRooms([...selectedRooms, apiRoom]); // Add room to selection
-      setRoomsLeftToSelect(roomsLeftToSelect - 1); // Reduce rooms left to select
+    if (!isRoomSelected) {
+      setSelectedRooms([...selectedRooms, { ...apiRoom, guestCount }]); // Add room to selection
+      // setRoomsLeftToSelect(roomsLeftToSelect - 1); // Reduce rooms left to select
     }
   };
 
@@ -390,56 +348,55 @@ const RoomCard = ({
           </div>
 
           {/* bottom part */}
-          <div className="w-full bg-secondary border-t-[#2e3778] border-t border-opacity-20 flex  justify-center sm:justify-end p-2 sm:p-4">
-            {isSingleRoomBooking ? (
-              <>
-                <div className="w-full flex flex-col gap-2 items-center sm:items-end">
-                  <ButtonPrimary text="Book Now" onClick={handleBookNow} />
-                  {isLoading && (
-                    <Image
-                      src="/images/icons/spinner-dark-blue.png"
-                      alt="wait spinner"
-                      width={25}
-                      height={25}
-                      quality={100}
-                      className="animate-spin w-[23px] h-[23px]"
-                    />
-                  )}
-                  {error && (
-                    <p className="text-s text-error-text">
-                      There was an error processing your request. Please try
-                      again.
-                    </p>
-                  )}
-                </div>
-              </>
+          <div className="w-full bg-secondary border-t-[#2e3778] border-t border-opacity-20 flex max-sm:flex-col max-sm:items-center justify-center sm:justify-end p-4 gap-6">
+            {!isRoomSelected && (
+              <div className="flex items-center gap-2 max-sm:mb-2 relative">
+                <label htmlFor="guest-count" className="text-sm font-semibold">
+                  Guests:
+                </label>
+                <Select
+                  onValueChange={(value) => setGuestCount(parseInt(value))}
+                  defaultValue={guestCount.toString()}
+                >
+                  <SelectTrigger className="border border-gray-300 rounded-md p-1 outline-none focus:ring-0 focus:outline-none focus:ring-offset-0">
+                    <SelectValue placeholder="Select guests" />
+                  </SelectTrigger>
+                  <SelectContent
+                    side={isLargeScreen ? "bottom" : "top"}
+                    align="start"
+                    className="z-50"
+                  >
+                    {Array.from(
+                      {
+                        length:
+                          cmsRoom.roomMaxGuests -
+                          cmsRoom.roomMinNumberOfGuests +
+                          1,
+                      },
+                      (_, i) => i + cmsRoom.roomMinNumberOfGuests
+                    ).map((count) => (
+                      <SelectItem key={count} value={count.toString()}>
+                        {count}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {!isRoomSelected ? (
+              <button
+                className="max-sm:w-full py-2 px-4 rounded-md bg-dark-blue text-white transform active:scale-95"
+                onClick={handleAddToBooking}
+              >
+                Add to Booking
+              </button>
             ) : (
-              <>
-                {!isRoomSelected && roomsLeftToSelect > 0 && (
-                  <button
-                    className="py-2 px-4 rounded-md bg-dark-blue text-white transform active:scale-95"
-                    onClick={handleAddToBooking}
-                  >
-                    Add to Booking
-                  </button>
-                )}
-                {isRoomSelected && (
-                  <h6 className="flex gap-1 justify-center items-start font-heavy">
-                    <span className="mt-[2px] text-accent-green">
-                      <FaCheck />
-                    </span>
-                    Room Added
-                  </h6>
-                )}
-                {!isRoomSelected && roomsLeftToSelect === 0 && (
-                  <button
-                    className="py-2 px-4 rounded-md bg-dark-blue text-white transform active:scale-95 disabled:active:scale-100 disabled:opacity-50"
-                    disabled
-                  >
-                    Add to Booking
-                  </button>
-                )}
-              </>
+              <h6 className="flex gap-1 justify-center items-start font-heavy">
+                <span className="mt-[2px] text-accent-green">
+                  <FaCheck />
+                </span>
+                Room Added
+              </h6>
             )}
           </div>
 
