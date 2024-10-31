@@ -46,7 +46,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMediaQuery } from "react-responsive";
 
 // Rich text rendering options for Contentful content
 const options = {
@@ -114,7 +113,6 @@ const RoomCard = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [isTooltip, setIsTooltip] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const isLargeScreen = useMediaQuery({ minWidth: 1024 });
 
   const router = useRouter(); // Initialize router
 
@@ -348,24 +346,41 @@ const RoomCard = ({
           </div>
 
           {/* bottom part */}
-          <div className="w-full bg-secondary border-t-[#2e3778] border-t border-opacity-20 flex max-sm:flex-col max-sm:items-center justify-center sm:justify-end p-4 gap-6">
+          <div className="w-full bg-secondary border-t-[#2e3778] border-t border-opacity-20 flex max-sm:flex-col max-sm:items-center justify-center sm:justify-end p-2 sm:p-4 gap-6">
             {!isRoomSelected && (
-              <div className="flex items-center gap-2 max-sm:mb-2 relative">
+              <div className="flex items-center gap-2">
                 <label htmlFor="guest-count" className="text-sm font-semibold">
                   Guests:
                 </label>
-                <Select
+                <select
+                  id="guest-count"
+                  value={guestCount}
+                  onChange={(e) => setGuestCount(parseInt(e.target.value))}
+                  className="border border-gray-300 rounded-md p-1 outline-none"
+                >
+                  {Array.from(
+                    {
+                      length:
+                        cmsRoom.roomMaxGuests -
+                        cmsRoom.roomMinNumberOfGuests +
+                        1,
+                    },
+                    (_, i) => i + cmsRoom.roomMinNumberOfGuests
+                  ).map((count) => (
+                    <option key={count} value={count}>
+                      {count}
+                    </option>
+                  ))}
+                </select>
+
+                {/* <Select
                   onValueChange={(value) => setGuestCount(parseInt(value))}
                   defaultValue={guestCount.toString()}
                 >
-                  <SelectTrigger className="border border-gray-300 rounded-md p-1 outline-none focus:ring-0 focus:outline-none focus:ring-offset-0">
+                  <SelectTrigger className="border border-gray-300 rounded-md p-1">
                     <SelectValue placeholder="Select guests" />
                   </SelectTrigger>
-                  <SelectContent
-                    side={isLargeScreen ? "bottom" : "top"}
-                    align="start"
-                    className="z-50"
-                  >
+                  <SelectContent>
                     {Array.from(
                       {
                         length:
@@ -380,7 +395,7 @@ const RoomCard = ({
                       </SelectItem>
                     ))}
                   </SelectContent>
-                </Select>
+                </Select> */}
               </div>
             )}
             {!isRoomSelected ? (
