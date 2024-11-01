@@ -72,7 +72,7 @@ const CheckoutCard = ({
 
     if (removedRoom) {
       setSelectedRooms(selectedRooms.filter((room) => room.roomId !== roomId)); // Remove room
-      setRoomsLeftToSelect((prev) => prev + 1); // Increment rooms left to select
+      //setRoomsLeftToSelect((prev) => prev + 1); // Increment rooms left to select
     }
   };
 
@@ -87,8 +87,8 @@ const CheckoutCard = ({
       status: "inquiry", // Temporary status
       arrival: searchData.checkIn, // Check-in date
       departure: searchData.checkOut, // Check-out date
-      numAdult: room.numAdult || searchData.totalGuestsNumber,
-      numChild: 0,
+      numAdult: room.guestsCount,
+      numChild: 0, // Always 0, as no children are allowed
     }));
 
     // Call the createTempBooking function from the hook
@@ -128,11 +128,21 @@ const CheckoutCard = ({
   };
 
   // Calculate total price
-  const totalPrice = selectedRooms.reduce((sum, room) => {
-    const roomPricePerNight = parseFloat(room.calendar?.[0]?.price1) || 0;
-    const roomTotalPrice = roomPricePerNight * nightsCount;
-    return sum + roomTotalPrice;
-  }, 0);
+  // const totalPrice = selectedRooms.reduce((sum, room) => {
+  //   const roomPricePerNight = parseFloat(room.calendar?.[0]?.price1) || 0;
+  //   const roomTotalPrice = roomPricePerNight * nightsCount;
+  //   return sum + roomTotalPrice;
+  // }, 0);
+  // Calculate total rooms, total guests, and total price
+  const totalRooms = selectedRooms.length;
+  const totalGuests = selectedRooms.reduce(
+    (sum, room) => sum + room.guestCount,
+    0
+  );
+  const totalPrice = selectedRooms.reduce(
+    (sum, room) => sum + room.totalPrice,
+    0
+  );
 
   // Set modal container in DOM
   useEffect(() => {
@@ -157,7 +167,10 @@ const CheckoutCard = ({
   };
 
   return (
-    <div className=" w-full sm:w-[260px] min-w-[260px] lg:w-[315px] lg:min-w-[315px] flex flex-col items-center gap-4">
+    <div
+      id="checkout"
+      className=" w-full sm:w-[260px] min-w-[260px] lg:w-[315px] lg:min-w-[315px] flex flex-col items-center gap-4"
+    >
       {/* show checkin and checkout */}
       <div className="w-full flex flex-col border-[#2e3778] border border-opacity-20">
         <div className="w-full flex justify-evenly sm:justify-center gap-4 p-4">
@@ -175,7 +188,7 @@ const CheckoutCard = ({
         </div>
         <div className="w-full p-4 bg-secondary border-t-[#2e3778] border-t border-opacity-20 flex flex-col justify-start">
           {/* Display selected rooms */}
-          {selectedRooms.length > 0 && (
+          {/* {selectedRooms.length > 0 && (
             <div className="w-full ">
               <h6 className="font-heavy">Selected Rooms:</h6>
               <ul className="mt-2 sm:mt-1">
@@ -217,6 +230,62 @@ const CheckoutCard = ({
                 <h3>€{totalPrice.toFixed(2)}</h3>
               </div>
             </div>
+          )} */}
+
+          {selectedRooms.map((room, index) => (
+            <li
+              key={index}
+              className="flex justify-between items-center mb-3 sm:mb-1"
+            >
+              <div>
+                <p className="text-s">{room.name}</p>
+                <p className="text-xs text-gray-500">
+                  Guests: {room.guestCount}
+                </p>{" "}
+                {/* Display guest count */}
+              </div>
+              <div className="flex justify-end">
+                <p className="text-s mr-3">
+                  €{room.totalPrice.toFixed(2).replace(/\.00$/, "")}
+                </p>
+                <button
+                  className="max-sm:hidden"
+                  onClick={() => handleRemoveRoom(room.roomId)}
+                >
+                  <RiCloseLargeFill size={20} className="text-error-text" />
+                </button>
+                <button
+                  className="sm:hidden text-error-text text-sm underline underline-offset-4"
+                  onClick={() => handleRemoveRoom(room.roomId)}
+                >
+                  Remove
+                </button>
+              </div>
+            </li>
+          ))}
+
+          {selectedRooms.length > 0 && (
+            <>
+              <div className="w-full h-px bg-[#2e3778] bg-opacity-20 my-3" />
+              <div className="w-full mb-3">
+                <h6 className="font-heavy">Subtotal:</h6>
+                <ul className="mt-2">
+                  <li className="flex justify-between text-s">
+                    <span>Total Rooms:</span>
+                    <span>{totalRooms}</span>
+                  </li>
+                  <li className="flex justify-between text-s">
+                    <span>Total Guests:</span>
+                    <span>{totalGuests}</span>
+                  </li>
+                </ul>
+              </div>
+              {/* Total Price */}
+              <div className="w-full flex justify-between items-center">
+                <h6 className="font-heavy">Total Price:</h6>
+                <h3>€{totalPrice.toFixed(2)}</h3>
+              </div>
+            </>
           )}
 
           {/* Proceed to Checkout Button */}
@@ -274,10 +343,9 @@ const CheckoutCard = ({
           )}
 
           {/* Display rooms to be selected */}
-          <p className="text-s text-center">
-            Select <strong>{totalRoomsNumber}</strong> room
-            {totalRoomsNumber > 1 ? "s" : ""}
-          </p>
+          {selectedRooms.length === 0 && (
+            <p className="text-s text-center">Select a room</p>
+          )}
         </div>
       </div>
       {/* advantages text */}

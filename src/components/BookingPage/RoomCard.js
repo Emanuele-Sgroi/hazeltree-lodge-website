@@ -28,6 +28,7 @@ import { VscQuestion } from "react-icons/vsc";
 import Modal from "react-modal";
 import { RiCloseLargeFill } from "react-icons/ri";
 import { FaCheck } from "react-icons/fa6";
+import { TiArrowSortedDown } from "react-icons/ti";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { BLOCKS, MARKS } from "@contentful/rich-text-types";
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
@@ -37,6 +38,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Link as ScrollLink } from "react-scroll";
 
 // Rich text rendering options for Contentful content
 const options = {
@@ -124,10 +126,18 @@ const RoomCard = ({
     (selectedRoom) => selectedRoom.roomId === apiRoom.roomId
   );
 
-  // Function for adding the selected room to checkout, in case of multiple rooms selection
+  // Function for adding the selected room to checkout - multiple rooms selection
   const handleAddToBooking = () => {
     if (!isRoomSelected) {
-      setSelectedRooms([...selectedRooms, { ...apiRoom, guestCount }]); // Add room to selection
+      setSelectedRooms([
+        ...selectedRooms,
+        {
+          ...apiRoom,
+          guestCount,
+          pricePerNight: getPriceByGuestCount(), // Store the correct price for the selected guests
+          totalPrice: getPriceByGuestCount() * nightsCount,
+        },
+      ]);
     }
   };
 
@@ -211,9 +221,14 @@ const RoomCard = ({
 
                 <div className="flex gap-1 items-start">
                   <span className="relative text-s xl:text-base font-normal text-accent-green">
-                    Up to {cmsRoom.roomMaxGuests} guests{" "}
-                    {/* {cmsRoom.roomSizeSquareMeters}
-                    m&sup2; */}
+                    {cmsRoom.roomMinNumberOfGuests === 1 ? (
+                      <>Up to {cmsRoom.roomMaxGuests} guests </>
+                    ) : (
+                      <>
+                        Between {cmsRoom.roomMinNumberOfGuests} and{" "}
+                        {cmsRoom.roomMaxGuests} guests{" "}
+                      </>
+                    )}
                     {cmsRoom.roomEnsuite ? "| Ensuite" : "| Dedicated bathroom"}
                     {cmsRoom.roomTipText && cmsRoom.roomTipText.length > 0 && (
                       <>
@@ -376,12 +391,23 @@ const RoomCard = ({
                 Add to Booking
               </button>
             ) : (
-              <h6 className="flex gap-1 justify-center items-start font-heavy">
-                <span className="mt-[2px] text-accent-green">
-                  <FaCheck />
-                </span>
-                Room Added
-              </h6>
+              <div className="flex flex-col gap-4">
+                <h6 className="flex gap-1 justify-center items-start font-heavy">
+                  <span className="mt-[2px] text-accent-green">
+                    <FaCheck />
+                  </span>
+                  Room Added
+                </h6>
+                <ScrollLink
+                  to="checkout"
+                  smooth={true}
+                  duration={1000}
+                  offset={-90}
+                  className="sm:hidden tracking-wider text-s font-semibold underline underline-offset-2 text-accent-green cursor-pointer flex flex-col justify-center items-center gap-0"
+                >
+                  Go to checkout <TiArrowSortedDown size={20} />
+                </ScrollLink>
+              </div>
             )}
           </div>
 
