@@ -33,6 +33,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { VscQuestion } from "react-icons/vsc";
+import { GrClose } from "react-icons/gr";
 
 /**
  * RoomsPageComponent Component
@@ -197,14 +198,6 @@ const RoomsPageComponent = ({ rooms }) => {
                     </span>
                   </div>
 
-                  {/* Display a message if the room is not ensuite */}
-                  {/* {!room.roomEnsuite && (
-                    <p className="text-base">
-                      <span className="font-heavy text-[#d32f2f]">X</span> This
-                      room does not have an ensuite bathroom
-                    </p>
-                  )} */}
-
                   {/* Amenities Accordion */}
                   {amenities && amenities.length > 0 && (
                     <Accordion
@@ -265,13 +258,21 @@ const RoomsPageComponent = ({ rooms }) => {
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] shadow-lg outline-none focus:outline-none max-lg:w-[95%]"
         overlayClassName="fixed inset-0 bg-[#000000bf] backdrop-blur-[2px] z-[9999]"
       >
-        <div className="w-full lg:max-h-[80vh] flex justify-center items-center">
+        <div className="relative w-full max-h-[80vh] flex justify-center items-center">
+          {/* Close Button */}
+          <button
+            onClick={closeModal}
+            className="absolute -top-14 left-1/2 transform -translate-x-1/2 text-white rounded-full border-2 border-white p-2 cursor-pointer z-[9998]"
+            aria-label="Close Modal"
+          >
+            <GrClose size={29} />
+          </button>
           <Carousel opts={{ loop: true, initialSlide: activeSlide }}>
             <CarouselContent>
               {initialModalIndex(modalImages).map((image, imgIndex) => (
                 <CarouselItem
                   key={imgIndex}
-                  className="flex justify-center lg:max-h-[80vh] items-center"
+                  className="flex justify-center lg:max-h-[80vh] items-center z-[9997]"
                 >
                   <Image
                     src={getAssetUrl(image)}
