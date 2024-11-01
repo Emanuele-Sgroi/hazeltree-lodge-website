@@ -264,13 +264,16 @@ const CheckoutWrapper = () => {
   const { searchData, selectedRooms } = bookingData;
   const rooms = Array.isArray(selectedRooms) ? selectedRooms : [selectedRooms];
 
-  const {
-    checkIn,
-    checkOut,
-    totalGuestsNumber,
-    totalRoomsNumber,
-    nightsCount,
-  } = searchData;
+  const { checkIn, checkOut, guests, totalRoomsNumber, nightsCount } =
+    searchData;
+
+  /**
+   * Calculate guests.
+   */
+  const totalGuests = selectedRooms.reduce(
+    (sum, room) => sum + room.guestCount,
+    0
+  );
 
   /**
    * Calculate total price.
@@ -313,7 +316,7 @@ const CheckoutWrapper = () => {
               Nights: <span className="font-heavy">{nightsCount}</span>
             </li>
             <li>
-              Guests: <span className="font-heavy">{totalGuestsNumber}</span>
+              Guests: <span className="font-heavy">{totalGuests}</span>
             </li>
             <li>
               Rooms selected:{" "}
