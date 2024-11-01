@@ -24,8 +24,6 @@ import {
   isSameDay,
   setHours,
   setMinutes,
-  isBefore,
-  startOfDay,
   differenceInCalendarMonths,
   addMonths,
 } from "date-fns";
@@ -36,21 +34,8 @@ import { PiWarningCircle, PiUsers } from "react-icons/pi";
 import { IoClose, IoMoonOutline, IoBedOutline } from "react-icons/io5";
 import { MdOutlineCalendarMonth } from "react-icons/md";
 import { LiaLongArrowAltRightSolid } from "react-icons/lia";
-import { FiMinus, FiPlus } from "react-icons/fi";
-import { IoIosArrowDown } from "react-icons/io";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import Loading from "@/components/Loading/Loading";
-
-import { Calendar as CalendarIcon } from "lucide-react";
-import { DateRange } from "react-day-picker";
-
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 
 import {
   Drawer,
@@ -89,10 +74,7 @@ const BookingSearchForm = ({
   infoText,
   dayCutoff,
   maxStay,
-  maxGuests,
-  maxRooms,
   maxBookingDate,
-  guestLabel,
   showAgeLimitText,
   ageLimitText,
   onSearch,
@@ -136,16 +118,6 @@ const BookingSearchForm = ({
 
   const [nightsCount, setNightsCount] = useState(initialNightsCount);
   const [isMobile, setIsMobile] = useState(false);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  // State for room and guest count
-  const [roomsCount, setRoomsCount] = useState(
-    initialSearchData?.totalRoomsNumber || 1
-  ); // Initial number of rooms
-  const [guestsCount, setGuestsCount] = useState(
-    initialSearchData?.totalGuestsNumber || 2
-  ); // Initial number of guests
-  const [minGuestsCount, setMinGuestsCount] = useState(1); // minimum guests
 
   //selection of price and date
   const [isDateValid, setIsDateValid] = useState(true);
@@ -238,7 +210,6 @@ const BookingSearchForm = ({
     const isTodayAfterCutoff =
       isSameDay(date, today) && new Date() > sameDayCutoff;
     const isPastDate = date < today.setHours(0, 0, 0, 0) || isTodayAfterCutoff;
-    const isBeyondMaxBookingDate = maxCheckinDate;
 
     const isSelectedStart =
       startDate && date.toDateString() === startDate.toDateString();
@@ -315,61 +286,6 @@ const BookingSearchForm = ({
     setNightsCount(0);
   };
 
-  // Decrease rooms count
-  // const decreaseRooms = () => {
-  //   setRoomsCount((prev) => Math.max(1, prev - 1));
-  // };
-
-  // // Increase rooms count
-  // const increaseRooms = () => {
-  //   setRoomsCount((prev) => Math.min(maxRooms, prev + 1));
-  // };
-
-  // Adjust the maximum guests based on room count
-  // const getMaxGuestsForRooms = (roomsCount) => {
-  //   if (roomsCount === 1) return 4;
-  //   if (roomsCount === 2) return 6;
-  //   return 8; // If 3 rooms are selected, max 8 guests
-  // };
-
-  // Adjust the minimum guests based on room count
-  // const getMinGuestsForRooms = (roomsCount) => {
-  //   if (roomsCount === 1) return 1;
-  //   if (roomsCount === 2) return 2;
-  //   return 3; // If 3 rooms are selected, max 8 guests
-  // };
-
-  // Decrease guests count
-  // const decreaseGuests = () => {
-  //   setGuestsCount((prev) => Math.max(1, prev - 1));
-  // };
-
-  // // Increase guests count with dynamic limit based on roomsCount
-  // const increaseGuests = () => {
-  //   const maxGuestsForRooms = getMaxGuestsForRooms(roomsCount);
-  //   setGuestsCount((prev) => Math.min(maxGuestsForRooms, prev + 1));
-  // };
-
-  // // Update guests limit dynamically when rooms count changes
-  // useEffect(() => {
-  //   const maxGuestsForRooms = getMaxGuestsForRooms(roomsCount);
-  //   if (guestsCount > maxGuestsForRooms) {
-  //     setGuestsCount(maxGuestsForRooms); // Adjust guests down if over the limit
-  //   }
-  // }, [roomsCount]);
-
-  // useEffect(() => {
-  //   const minGuestsForRooms = getMinGuestsForRooms(roomsCount);
-  //   if (guestsCount < minGuestsForRooms) {
-  //     setGuestsCount(minGuestsForRooms); // Adjust guests up if below the limit
-  //     // setMinGuestsCount(roomsCount);
-  //   }
-  // }, [roomsCount]);
-
-  // // Calculate total guests and rooms for display
-  // const totalGuestsNumber = guestsCount;
-  // const totalRoomsNumber = roomsCount;
-
   // Handle search button click
   const handleSearchAction = () => {
     if (startDate && endDate) {
@@ -381,8 +297,6 @@ const BookingSearchForm = ({
           checkIn: format(startDate, "yyy-MM-dd"),
           checkOut: format(endDate, "yyy-MM-dd"),
           nightsCount,
-          //  totalGuestsNumber,
-          //  totalRoomsNumber,
         };
         setIsDateValid(true);
         setIsDateSelected(true);
@@ -488,7 +402,6 @@ const BookingSearchForm = ({
                       endDate={endDate}
                       selectsRange
                       inline
-                      //  monthsShown={isMobile ? 1 : 2}
                       monthsShown={isMobile ? totalMonths : 2}
                       minDate={new Date()} // Prevent selecting past dates
                       maxDate={maxCheckinDate} // Limit the latest date for check-in
@@ -540,129 +453,6 @@ const BookingSearchForm = ({
               </span>
             </div>
 
-            {/* Guests and rooms selection */}
-            {/* <Popover onOpenChange={(open) => setIsPopoverOpen(open)}>
-              <PopoverTrigger className="flex items-center gap-4 cursor-pointer">
-                <div className="flex gap-2">
-                  <IoBedOutline className="text-accent-green" size={22} />
-                  <span>{`${totalRoomsNumber} Room${
-                    totalRoomsNumber > 1 ? "s" : ""
-                  } `}</span>
-                </div>
-                <div className="flex gap-2">
-                  <PiUsers className="text-accent-green" size={22} />
-                  <span>{`${totalGuestsNumber} ${guestLabel}${
-                    totalGuestsNumber > 1 ? "s" : ""
-                  }`}</span>
-                </div>
-                <IoIosArrowDown
-                  className={`transform transition-all duration-300 ${
-                    isPopoverOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </PopoverTrigger>
-
-              <PopoverContent className="p-4 bg-white shadow-lg rounded-md">
-                <div className="mb-4 border-b border-gray-300 pb-2">
-                  {/* Select number of rooms */}
-            {/* <div className="flex justify-between items-center text-dark-blue mb-4">
-                    <h4 className="text-2xl">Rooms</h4>
-                    <div className="min-w-[100px] flex justify-between gap-2 items-center text-dark-blue">
-                      <button
-                        onClick={decreaseRooms}
-                        disabled={roomsCount === 1}
-                        className={`p-2 rounded-full border transform ${
-                          roomsCount === 1
-                            ? "cursor-default border-gray-400"
-                            : "border-accent-green active:scale-95"
-                        }`}
-                      >
-                        <FiMinus
-                          className={`${
-                            roomsCount === 1
-                              ? " text-gray-400"
-                              : "text-accent-green"
-                          }`}
-                        />
-                      </button>
-                      <span className="text-xl font-heavy">{roomsCount}</span>
-                      <button
-                        onClick={increaseRooms}
-                        disabled={roomsCount === maxRooms}
-                        className={`p-2 rounded-full border transform ${
-                          roomsCount === maxRooms
-                            ? "cursor-default border-gray-400"
-                            : "border-accent-green active:scale-95"
-                        }`}
-                      >
-                        <FiPlus
-                          className={`${
-                            roomsCount === maxRooms
-                              ? " text-gray-400"
-                              : "text-accent-green"
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div> */}
-
-            {/* Select number of guests */}
-            {/* <div className="flex justify-between items-center text-dark-blue">
-                    <h4 className="text-2xl">Guests</h4>
-                    <div className="min-w-[100px] flex justify-between gap-2 items-center text-dark-blue">
-                      <button
-                        onClick={decreaseGuests}
-                        disabled={
-                          getMinGuestsForRooms(roomsCount) === guestsCount
-                        }
-                        className={`p-2 rounded-full border transform ${
-                          getMinGuestsForRooms(roomsCount) === guestsCount
-                            ? "cursor-default border-gray-400"
-                            : "border-accent-green active:scale-95"
-                        }`}
-                      >
-                        <FiMinus
-                          className={`${
-                            getMinGuestsForRooms(roomsCount) === guestsCount
-                              ? " text-gray-400"
-                              : "text-accent-green"
-                          }`}
-                        />
-                      </button>
-                      <span className="text-xl font-heavy">{guestsCount}</span>
-                      <button
-                        onClick={increaseGuests}
-                        disabled={
-                          getMaxGuestsForRooms(roomsCount) === guestsCount
-                        }
-                        className={`p-2 rounded-full border transform ${
-                          guestsCount === getMaxGuestsForRooms(roomsCount)
-                            ? "cursor-default border-gray-400"
-                            : "border-accent-green active:scale-95"
-                        }`}
-                      >
-                        <FiPlus
-                          className={`${
-                            guestsCount === getMaxGuestsForRooms(roomsCount)
-                              ? " text-gray-400"
-                              : "text-accent-green"
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                </div> */}
-
-            {/* Information text */}
-            {/* {showAgeLimitText && (
-                  <p className="text-xs text-gray-500 mt-4 flex items-center gap-1">
-                    <PiWarningCircle size={14} />
-                    {ageLimitText}
-                  </p>
-                )}
-              </PopoverContent>
-             </Popover>  */}
-
             {/* Search button */}
             <button
               className="py-2 px-4 rounded-md bg-dark-blue text-white transform active:scale-95"
@@ -697,7 +487,6 @@ const BookingSearchForm = ({
                   endDate={endDate}
                   selectsRange
                   inline
-                  //  monthsShown={isMobile ? 1 : 2}
                   monthsShown={isMobile ? totalMonths : 2}
                   minDate={new Date()} // Prevent selecting past dates
                   maxDate={maxCheckinDate} // Limit the latest date for check-in

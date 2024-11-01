@@ -10,7 +10,6 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { ButtonPrimary } from "@/components";
 import { getAssetUrl } from "@/utils/imageUtils";
 import {
   Tooltip,
@@ -29,9 +28,9 @@ import { VscQuestion } from "react-icons/vsc";
 import Modal from "react-modal";
 import { RiCloseLargeFill } from "react-icons/ri";
 import { FaCheck } from "react-icons/fa6";
+import { TiArrowSortedDown } from "react-icons/ti";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { BLOCKS, MARKS } from "@contentful/rich-text-types";
-import { v4 as uuidv4 } from "uuid"; // Import uuid
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useTempBooking } from "@/hooks/useTempBooking";
 import {
@@ -39,14 +38,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useMediaQuery } from "react-responsive";
+import { Link as ScrollLink } from "react-scroll";
 
 // Rich text rendering options for Contentful content
 const options = {
@@ -101,26 +93,29 @@ const RoomCard = ({
   searchData,
   selectedRooms,
   setSelectedRooms,
-  roomsLeftToSelect,
-  setRoomsLeftToSelect,
-  isShowingAlternatives,
 }) => {
-  // Initialize guest count with the minimum number of guests for the room
-  const [guestCount, setGuestCount] = useState(
-    cmsRoom.roomMinNumberOfGuests || 1
-  );
+  // Initialize guest count with 2
+  const [guestCount, setGuestCount] = useState(2);
   const [isImagesModalOpen, setIsImagesModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isTooltip, setIsTooltip] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const isLargeScreen = useMediaQuery({ minWidth: 1024 });
-
-  const router = useRouter(); // Initialize router
 
   const { checkIn, checkOut, nightsCount } = searchData;
 
-  const { priceInfo } = cmsResultData;
+  const { priceInfo } = cmsResultData; // Text below price from the CMS (Booking page content)
+
+  // Helper function to get the correct price based on guest count
+  const getPriceByGuestCount = () => {
+    if (guestCount === 2) return apiRoom.calendar?.[0].price1;
+    if (guestCount === 3) return apiRoom.calendar?.[0].price2;
+    if (guestCount === 4) return apiRoom.calendar?.[0].price3;
+    return apiRoom.calendar?.[0].price1; // Default to price1 if guest count doesn't match
+  };
+
+  // Calculated price for display
+  const currentPrice = getPriceByGuestCount() * nightsCount;
 
   const amenities = cmsRoom.amenitiesReference?.map(
     (amenity) => amenity.fields
@@ -131,13 +126,18 @@ const RoomCard = ({
     (selectedRoom) => selectedRoom.roomId === apiRoom.roomId
   );
 
-  const { createTempBooking, isLoading, error } = useTempBooking(); // Destructure the hook
-
-  // Function for adding the selected room to checkout, in case of multiple rooms selection
+  // Function for adding the selected room to checkout - multiple rooms selection
   const handleAddToBooking = () => {
     if (!isRoomSelected) {
-      setSelectedRooms([...selectedRooms, { ...apiRoom, guestCount }]); // Add room to selection
-      // setRoomsLeftToSelect(roomsLeftToSelect - 1); // Reduce rooms left to select
+      setSelectedRooms([
+        ...selectedRooms,
+        {
+          ...apiRoom,
+          guestCount,
+          pricePerNight: getPriceByGuestCount(), // Store the correct price for the selected guests
+          totalPrice: getPriceByGuestCount() * nightsCount,
+        },
+      ]);
     }
   };
 
@@ -221,9 +221,14 @@ const RoomCard = ({
 
                 <div className="flex gap-1 items-start">
                   <span className="relative text-s xl:text-base font-normal text-accent-green">
-                    Up to {cmsRoom.roomMaxGuests} guests{" "}
-                    {/* {cmsRoom.roomSizeSquareMeters}
-                    m&sup2; */}
+                    {cmsRoom.roomMinNumberOfGuests === 1 ? (
+                      <>Up to {cmsRoom.roomMaxGuests} guests </>
+                    ) : (
+                      <>
+                        Between {cmsRoom.roomMinNumberOfGuests} and{" "}
+                        {cmsRoom.roomMaxGuests} guests{" "}
+                      </>
+                    )}
                     {cmsRoom.roomEnsuite ? "| Ensuite" : "| Dedicated bathroom"}
                     {cmsRoom.roomTipText && cmsRoom.roomTipText.length > 0 && (
                       <>
@@ -320,67 +325,62 @@ const RoomCard = ({
                 </button>
               </div>
             </div>
+
             {/* price */}
             <div className="w-full lg:w-[28%] lg:border-l-[#2e3778] lg:border-l lg:border-opacity-20 lg:border-dashed flex flex-col justify-center items-center p-2 sm:p-4">
               <h3>
-                €
-                {parseFloat(apiRoom.calendar?.[0].price1 * nightsCount)
-                  .toFixed(2)
-                  .replace(/\.00$/, "")}
+                €{parseFloat(currentPrice).toFixed(2).replace(/\.00$/, "")}
               </h3>
               {nightsCount > 1 && (
                 <p className="text-s text-[#a8a8a8] text-center font-heavy">
                   €
-                  {parseFloat(apiRoom.calendar?.[0].price1)
+                  {parseFloat(getPriceByGuestCount())
                     .toFixed(2)
                     .replace(/\.00$/, "")}
                   /night
                 </p>
               )}
               <div className="flex flex-col justify-center">
-                {priceInfo.split("\n").map((line, index) => (
-                  <p key={index} className="text-s text-[#a8a8a8] text-center">
-                    {line}
-                  </p>
-                ))}
+                {priceInfo &&
+                  priceInfo.split("\n").map((line, index) => (
+                    <p
+                      key={index}
+                      className="text-s text-[#a8a8a8] text-center"
+                    >
+                      {line}
+                    </p>
+                  ))}
               </div>
             </div>
           </div>
 
           {/* bottom part */}
-          <div className="w-full bg-secondary border-t-[#2e3778] border-t border-opacity-20 flex max-sm:flex-col max-sm:items-center justify-center sm:justify-end p-4 gap-6">
+          <div className="w-full bg-secondary border-t-[#2e3778] border-t border-opacity-20 flex max-sm:flex-col max-sm:items-center justify-center sm:justify-end p-2 sm:p-4 gap-6">
             {!isRoomSelected && (
-              <div className="flex items-center gap-2 max-sm:mb-2 relative">
+              <div className="flex items-center gap-2">
                 <label htmlFor="guest-count" className="text-sm font-semibold">
-                  Guests:
+                  Select the number of guests:
                 </label>
-                <Select
-                  onValueChange={(value) => setGuestCount(parseInt(value))}
-                  defaultValue={guestCount.toString()}
+                <select
+                  id="guest-count"
+                  value={guestCount}
+                  onChange={(e) => setGuestCount(parseInt(e.target.value))}
+                  className="border border-gray-300 rounded-md p-1 outline-none"
                 >
-                  <SelectTrigger className="border border-gray-300 rounded-md p-1 outline-none focus:ring-0 focus:outline-none focus:ring-offset-0">
-                    <SelectValue placeholder="Select guests" />
-                  </SelectTrigger>
-                  <SelectContent
-                    side={isLargeScreen ? "bottom" : "top"}
-                    align="start"
-                    className="z-50"
-                  >
-                    {Array.from(
-                      {
-                        length:
-                          cmsRoom.roomMaxGuests -
-                          cmsRoom.roomMinNumberOfGuests +
-                          1,
-                      },
-                      (_, i) => i + cmsRoom.roomMinNumberOfGuests
-                    ).map((count) => (
-                      <SelectItem key={count} value={count.toString()}>
-                        {count}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  {Array.from(
+                    {
+                      length:
+                        cmsRoom.roomMaxGuests -
+                        cmsRoom.roomMinNumberOfGuests +
+                        1,
+                    },
+                    (_, i) => i + cmsRoom.roomMinNumberOfGuests
+                  ).map((count) => (
+                    <option key={count} value={count}>
+                      {count}
+                    </option>
+                  ))}
+                </select>
               </div>
             )}
             {!isRoomSelected ? (
@@ -391,12 +391,23 @@ const RoomCard = ({
                 Add to Booking
               </button>
             ) : (
-              <h6 className="flex gap-1 justify-center items-start font-heavy">
-                <span className="mt-[2px] text-accent-green">
-                  <FaCheck />
-                </span>
-                Room Added
-              </h6>
+              <div className="flex flex-col gap-4">
+                <h6 className="flex gap-1 justify-center items-start font-heavy">
+                  <span className="mt-[2px] text-accent-green">
+                    <FaCheck />
+                  </span>
+                  Room Added
+                </h6>
+                <ScrollLink
+                  to="checkout"
+                  smooth={true}
+                  duration={1000}
+                  offset={-90}
+                  className="sm:hidden tracking-wider text-s font-semibold underline underline-offset-2 text-accent-green cursor-pointer flex flex-col justify-center items-center gap-0"
+                >
+                  Go to checkout <TiArrowSortedDown size={20} />
+                </ScrollLink>
+              </div>
             )}
           </div>
 
