@@ -39,6 +39,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Link as ScrollLink } from "react-scroll";
+import { GrClose } from "react-icons/gr";
 
 // Rich text rendering options for Contentful content
 const options = {
@@ -481,7 +482,15 @@ const ImageModal = ({ isOpen, onRequestClose, images, isAnimating }) => {
       }`}
       overlayClassName="fixed inset-0 bg-[#000000bf] backdrop-blur-[2px] z-[9999]"
     >
-      <div className="w-full lg:max-h-[80vh] flex justify-center items-center">
+      <div className="relative w-full lg:max-h-[80vh] flex justify-center items-center">
+        {/* Close Button */}
+        <button
+          onClick={onRequestClose}
+          className="absolute -top-14 left-1/2 transform -translate-x-1/2 text-white rounded-full border-2 border-white p-2 cursor-pointer z-[9998]"
+          aria-label="Close Modal"
+        >
+          <GrClose size={29} />
+        </button>
         <Carousel opts={{ loop: true }}>
           <CarouselContent>
             {images.map((image, imgIndex) => (
