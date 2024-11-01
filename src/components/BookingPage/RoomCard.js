@@ -10,7 +10,6 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { ButtonPrimary } from "@/components";
 import { getAssetUrl } from "@/utils/imageUtils";
 import {
   Tooltip,
@@ -31,7 +30,6 @@ import { RiCloseLargeFill } from "react-icons/ri";
 import { FaCheck } from "react-icons/fa6";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { BLOCKS, MARKS } from "@contentful/rich-text-types";
-import { v4 as uuidv4 } from "uuid"; // Import uuid
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { useTempBooking } from "@/hooks/useTempBooking";
 import {
@@ -39,13 +37,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 // Rich text rendering options for Contentful content
 const options = {
@@ -100,25 +91,29 @@ const RoomCard = ({
   searchData,
   selectedRooms,
   setSelectedRooms,
-  roomsLeftToSelect,
-  setRoomsLeftToSelect,
-  isShowingAlternatives,
 }) => {
-  // Initialize guest count with the minimum number of guests for the room
-  const [guestCount, setGuestCount] = useState(
-    cmsRoom.roomMinNumberOfGuests || 1
-  );
+  // Initialize guest count with 2
+  const [guestCount, setGuestCount] = useState(2);
   const [isImagesModalOpen, setIsImagesModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isTooltip, setIsTooltip] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  const router = useRouter(); // Initialize router
-
   const { checkIn, checkOut, nightsCount } = searchData;
 
-  const { priceInfo } = cmsResultData;
+  const { priceInfo } = cmsResultData; // Text below price from the CMS (Booking page content)
+
+  // Helper function to get the correct price based on guest count
+  const getPriceByGuestCount = () => {
+    if (guestCount === 2) return apiRoom.calendar?.[0].price1;
+    if (guestCount === 3) return apiRoom.calendar?.[0].price2;
+    if (guestCount === 4) return apiRoom.calendar?.[0].price3;
+    return apiRoom.calendar?.[0].price1; // Default to price1 if guest count doesn't match
+  };
+
+  // Calculated price for display
+  const currentPrice = getPriceByGuestCount() * nightsCount;
 
   const amenities = cmsRoom.amenitiesReference?.map(
     (amenity) => amenity.fields
@@ -129,13 +124,10 @@ const RoomCard = ({
     (selectedRoom) => selectedRoom.roomId === apiRoom.roomId
   );
 
-  const { createTempBooking, isLoading, error } = useTempBooking(); // Destructure the hook
-
   // Function for adding the selected room to checkout, in case of multiple rooms selection
   const handleAddToBooking = () => {
     if (!isRoomSelected) {
       setSelectedRooms([...selectedRooms, { ...apiRoom, guestCount }]); // Add room to selection
-      // setRoomsLeftToSelect(roomsLeftToSelect - 1); // Reduce rooms left to select
     }
   };
 
@@ -318,29 +310,31 @@ const RoomCard = ({
                 </button>
               </div>
             </div>
+
             {/* price */}
             <div className="w-full lg:w-[28%] lg:border-l-[#2e3778] lg:border-l lg:border-opacity-20 lg:border-dashed flex flex-col justify-center items-center p-2 sm:p-4">
               <h3>
-                €
-                {parseFloat(apiRoom.calendar?.[0].price1 * nightsCount)
-                  .toFixed(2)
-                  .replace(/\.00$/, "")}
+                €{parseFloat(currentPrice).toFixed(2).replace(/\.00$/, "")}
               </h3>
               {nightsCount > 1 && (
                 <p className="text-s text-[#a8a8a8] text-center font-heavy">
                   €
-                  {parseFloat(apiRoom.calendar?.[0].price1)
+                  {parseFloat(getPriceByGuestCount())
                     .toFixed(2)
                     .replace(/\.00$/, "")}
                   /night
                 </p>
               )}
               <div className="flex flex-col justify-center">
-                {priceInfo.split("\n").map((line, index) => (
-                  <p key={index} className="text-s text-[#a8a8a8] text-center">
-                    {line}
-                  </p>
-                ))}
+                {priceInfo &&
+                  priceInfo.split("\n").map((line, index) => (
+                    <p
+                      key={index}
+                      className="text-s text-[#a8a8a8] text-center"
+                    >
+                      {line}
+                    </p>
+                  ))}
               </div>
             </div>
           </div>
@@ -350,7 +344,7 @@ const RoomCard = ({
             {!isRoomSelected && (
               <div className="flex items-center gap-2">
                 <label htmlFor="guest-count" className="text-sm font-semibold">
-                  Guests:
+                  Select the number of guests:
                 </label>
                 <select
                   id="guest-count"
@@ -372,30 +366,6 @@ const RoomCard = ({
                     </option>
                   ))}
                 </select>
-
-                {/* <Select
-                  onValueChange={(value) => setGuestCount(parseInt(value))}
-                  defaultValue={guestCount.toString()}
-                >
-                  <SelectTrigger className="border border-gray-300 rounded-md p-1">
-                    <SelectValue placeholder="Select guests" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from(
-                      {
-                        length:
-                          cmsRoom.roomMaxGuests -
-                          cmsRoom.roomMinNumberOfGuests +
-                          1,
-                      },
-                      (_, i) => i + cmsRoom.roomMinNumberOfGuests
-                    ).map((count) => (
-                      <SelectItem key={count} value={count.toString()}>
-                        {count}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select> */}
               </div>
             )}
             {!isRoomSelected ? (
