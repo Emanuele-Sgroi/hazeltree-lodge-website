@@ -143,6 +143,7 @@ const BookingWrapper = () => {
         maxStay={content.datePickerMaximumStay}
         dayCutoff={content.datePickerDayCutoff}
         maxBookingDate={maxBookingDate}
+        totalMonthsForCalendar={content.dataPickerMaxBookingDateInMonths}
         showAgeLimitText={content.guestsSelectionShowAgeLimitText}
         ageLimitText={content.guestsSelectionAgeLimitText}
         onSearch={handleSearch}

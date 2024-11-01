@@ -75,6 +75,7 @@ const BookingSearchForm = ({
   dayCutoff,
   maxStay,
   maxBookingDate,
+  totalMonthsForCalendar,
   showAgeLimitText,
   ageLimitText,
   onSearch,
@@ -162,7 +163,10 @@ const BookingSearchForm = ({
   //total months for datapicker
   //const totalMonths = differenceInCalendarMonths(maxCheckinDate, today) + 1;
   const totalMonths =
-    differenceInCalendarMonths(addMonths(today, 36), today) + 1;
+    differenceInCalendarMonths(
+      addMonths(today, totalMonthsForCalendar),
+      today
+    ) + 1;
 
   // disable dates that are not available
   const isDateDisabled = (date) => {
@@ -181,9 +185,19 @@ const BookingSearchForm = ({
     // Disable dates beyond maxBookingDate
     const isBeyondMaxBookingDate = date > maxCheckinDate;
 
-    // Allow the day before an unavailable date to be a valid check-out
-    const isValidCheckout = startDate && isSameDay(addDays(startDate, 1), date);
+    // Check if this is the first unavailable day in a sequence
+    const previousDate = addDays(date, -1);
+    const isPreviousDayAvailable = availabilityData?.data?.some(
+      (room) => room.availability[format(previousDate, "yyyy-MM-dd")] === true
+    );
+    const isFirstUnavailableDay = isUnavailable && isPreviousDayAvailable;
 
+    // Ensure it's a valid checkout only if within "maxStay" days of check-in
+    const isWithinFiveDays =
+      startDate &&
+      differenceInDays(date, startDate) <= maxStay &&
+      differenceInDays(date, startDate) > 0;
+    const isValidCheckout = isFirstUnavailableDay && isWithinFiveDays;
     return (
       isPastDate ||
       isBeyondMaxBookingDate ||
@@ -218,7 +232,19 @@ const BookingSearchForm = ({
     const isInRange =
       startDate && endDate && date > startDate && date < endDate;
 
-    const isValidCheckout = startDate && isSameDay(addDays(startDate, 1), date);
+    // Check if this is the first unavailable day in a sequence
+    const previousDate = addDays(date, -1);
+    const isPreviousDayAvailable = availabilityData?.data?.some(
+      (room) => room.availability[format(previousDate, "yyyy-MM-dd")] === true
+    );
+    const isFirstUnavailableDay = isUnavailable && isPreviousDayAvailable;
+
+    // Ensure it's a valid checkout only if within "maxStay" days of check-in
+    const isWithinFiveDays =
+      startDate &&
+      differenceInDays(date, startDate) <= maxStay &&
+      differenceInDays(date, startDate) > 0;
+    const isValidCheckout = isFirstUnavailableDay && isWithinFiveDays;
 
     const dayClass = classNames({
       "react-datepicker__day--selected": isSelectedStart || isSelectedEnd,
@@ -229,7 +255,8 @@ const BookingSearchForm = ({
         isPastDate ||
         (isUnavailable && !isValidCheckout) ||
         date > maxCheckinDate,
-      "react-datepicker__day--unavailable": isUnavailable && !isValidCheckout,
+      "react-datepicker__day--unavailable":
+        isUnavailable && !isValidCheckout && !isFirstUnavailableDay,
     });
 
     return (
@@ -242,7 +269,10 @@ const BookingSearchForm = ({
             <span className="text-[10px] md:text-xs font-light">{price}</span>
           )}
         {isUnavailable && !isValidCheckout && (
-          <TfiClose className="absolute" color="red" />
+          // <TfiClose className="absolute" color="red" />
+          <span className="text-error-text absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl">
+            X
+          </span>
         )}
       </div>
     );
@@ -387,7 +417,7 @@ const BookingSearchForm = ({
                     <span>{formattedEndDate}</span>
                   </div>
                 </DrawerTrigger>
-                <DrawerContent className=" h-[86svh] z-[99999]">
+                <DrawerContent className=" h-[87svh] z-[99999]">
                   <DrawerHeader>
                     <DrawerTitle>
                       <h4>Select Dates</h4>
@@ -411,7 +441,9 @@ const BookingSearchForm = ({
                   </div>
                   <DrawerFooter>
                     <div className="relative w-full  mb-3 flex flex-col items-center z-[99999]">
-                      {showPrices && <p className="text-center">{infoText}</p>}
+                      {showPrices && (
+                        <p className="text-center text-xs">{infoText}</p>
+                      )}
                       {showPrices && (
                         <div className="w-full h-px bg-[#2e3778] bg-opacity-20 mt-4"></div>
                       )}
@@ -429,6 +461,12 @@ const BookingSearchForm = ({
                               Nights
                             </p>
                           </div>
+                          {showAgeLimitText && (
+                            <div className="flex items-center gap-1 text-error-text">
+                              <PiWarningCircle size={15} />
+                              <p className="text-s">{ageLimitText}</p>
+                            </div>
+                          )}
                         </div>
                         <button
                           onClick={handleClearDates}
@@ -472,7 +510,7 @@ const BookingSearchForm = ({
             }`}
             overlayClassName="fixed inset-0 bg-[#000000bf] z-40 transition-opacity duration-200 ease-in-out z-[9999]"
           >
-            <div className="bg-primary flex flex-col max-w-[99%] lg:min-w-[945px] max-h-[95vh] h-fit lg:h-[680px] overflow-hidden shadow-lg rounded outline-none focus:outline-none transition-all duration-200 ease-in-out px-4">
+            <div className="bg-primary flex flex-col max-w-[99%] lg:min-w-[945px] max-h-[95vh] h-fit lg:h-[700px] overflow-hidden shadow-lg rounded outline-none focus:outline-none transition-all duration-200 ease-in-out px-4">
               <div className="w-full pt-4 mb-6 flex justify-end">
                 <button onClick={closeCalendarModal}>
                   <IoClose size={25} />
@@ -510,6 +548,12 @@ const BookingSearchForm = ({
                         Nights
                       </p>
                     </div>
+                    {showAgeLimitText && (
+                      <div className="flex items-center gap-1 text-error-text">
+                        <PiWarningCircle size={15} />
+                        <p className="text-s">{ageLimitText}</p>
+                      </div>
+                    )}
                   </div>
                   <button
                     onClick={handleClearDates}
