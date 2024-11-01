@@ -142,11 +142,7 @@ const BookingWrapper = () => {
         infoText={content.datePickerPricesInfoText}
         maxStay={content.datePickerMaximumStay}
         dayCutoff={content.datePickerDayCutoff}
-        maxGuests={content.guestsSelectionMaxGuestsNumber}
-        // Add minimum guests for twin room here
-        maxRooms={content.guestsSelectionSelectableRoomsNumber}
-        maxBookingDate={maxBookingDate} // to edit
-        guestLabel={content.guestsSelectionGuestLabel}
+        maxBookingDate={maxBookingDate}
         showAgeLimitText={content.guestsSelectionShowAgeLimitText}
         ageLimitText={content.guestsSelectionAgeLimitText}
         onSearch={handleSearch}

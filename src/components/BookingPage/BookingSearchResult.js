@@ -10,8 +10,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useBeds24RoomsOffers } from "@/hooks/useBeds24RoomsOffers";
-import { allocateRooms } from "@/utils/allocateRooms";
-import { generateAlternativeRooms } from "@/utils/generateAlternativeRooms";
 import { RoomCard, CheckoutCard } from "@/components";
 import { format } from "date-fns";
 
@@ -44,147 +42,8 @@ const BookingSearchResults = ({
     isError,
   } = useBeds24RoomsOffers(checkIn, checkOut);
 
-  // States for allocate rooms and alternatives
-  // const [allocatedRooms, setAllocatedRooms] = useState([]);
-  // const [alternativeRooms, setAlternativeRooms] = useState([]);
-
   // States for handling rooms selections
   const [selectedRooms, setSelectedRooms] = useState([]);
-  // const [roomsLeftToSelect, setRoomsLeftToSelect] = useState(totalRoomsNumber);
-  // const [isShowingAlternatives, setIsShowingAlternatives] = useState(false);
-  const [previousCheckIn, setPreviousCheckIn] = useState(null);
-  const [previousCheckOut, setPreviousCheckOut] = useState(null);
-  //const [previousGuestsNumber, setPreviousGuestsNumber] = useState(null);
-  // const [previousRoomsNumber, setPreviousRoomsNumber] = useState(null);
-  //const [isAllocatingRooms, setIsAllocatingRooms] = useState(true); // New state to track allocation progress
-
-  // Reset state when totalRoomsNumber changes
-  // useEffect(() => {
-  // Reset state on every new search
-  // setRoomsLeftToSelect(totalRoomsNumber); // Reset roomsLeftToSelect
-  //  setSelectedRooms([]); // Clear previously selected rooms
-  // }, [totalRoomsNumber, totalGuestsNumber, checkIn, checkOut]);
-
-  // useEffect(() => {
-  //   // Determine if search parameters have changed
-  //   const isNewSearch =
-  //     checkIn !== previousCheckIn ||
-  //     checkOut !== previousCheckOut;
-
-  //   // Only proceed if not loading and roomsOffers are available
-  //   if (!isLoading && roomsOffers.length > 0) {
-  //     if (isNewSearch) {
-  //       setIsAllocatingRooms(true); // Start allocation
-
-  //       // Reset states for the new search
-  //       setAllocatedRooms([]);
-  //       setAlternativeRooms([]);
-  //       setSelectedRooms([]);
-  //       setRoomsLeftToSelect(totalRoomsNumber);
-
-  //       // Allocate rooms based on the new search parameters
-  //       const allocated = allocateRooms(
-  //         totalGuestsNumber,
-  //         totalRoomsNumber,
-  //         roomsOffers,
-  //         roomsRef,
-  //         checkIn,
-  //         checkOut
-  //       );
-
-  //       setAllocatedRooms(allocated);
-
-  //       // Handle alternative rooms if no exact match is found
-  //       if (allocated.length === 0) {
-  //         const alternatives = generateAlternativeRooms(
-  //           totalGuestsNumber,
-  //           roomsOffers,
-  //           roomsRef,
-  //           checkIn,
-  //           checkOut
-  //         );
-
-  //         setAlternativeRooms(alternatives);
-  //         setIsShowingAlternatives(true);
-
-  //         // Set the minimum number of rooms required from the alternatives
-  //         if (alternatives.length > 0) {
-  //           const minRoomsNeeded = Math.min(
-  //             ...alternatives.map((c) => c.length)
-  //           );
-  //           setRoomsLeftToSelect(minRoomsNeeded);
-  //         } else {
-  //           setRoomsLeftToSelect(0);
-  //         }
-  //       } else {
-  //         setAlternativeRooms([]);
-  //         setIsShowingAlternatives(false);
-  //         setRoomsLeftToSelect(totalRoomsNumber);
-  //       }
-
-  //       setIsAllocatingRooms(false); // Allocation complete
-
-  //       // Update previous search values
-  //       setPreviousCheckIn(checkIn);
-  //       setPreviousCheckOut(checkOut);
-  //       setPreviousGuestsNumber(totalGuestsNumber);
-  //       setPreviousRoomsNumber(totalRoomsNumber);
-  //     } else {
-  //       setIsAllocatingRooms(true); // Start allocation
-
-  //       const allocated = allocateRooms(
-  //         totalGuestsNumber,
-  //         totalRoomsNumber,
-  //         roomsOffers,
-  //         roomsRef,
-  //         checkIn,
-  //         checkOut
-  //       );
-
-  //       setAllocatedRooms(allocated);
-
-  //       if (allocated.length === 0) {
-  //         const alternatives = generateAlternativeRooms(
-  //           totalGuestsNumber,
-  //           roomsOffers,
-  //           roomsRef,
-  //           checkIn,
-  //           checkOut
-  //         );
-
-  //         setAlternativeRooms(alternatives);
-  //         setIsShowingAlternatives(true);
-
-  //         if (alternatives.length > 0) {
-  //           const minRoomsNeeded = Math.min(
-  //             ...alternatives.map((c) => c.length)
-  //           );
-  //           setRoomsLeftToSelect(minRoomsNeeded);
-  //         } else {
-  //           setRoomsLeftToSelect(0);
-  //         }
-  //       } else {
-  //         setAlternativeRooms([]);
-  //         setIsShowingAlternatives(false);
-  //         setRoomsLeftToSelect(totalRoomsNumber);
-  //       }
-
-  //       setIsAllocatingRooms(false); // Allocation complete
-  //     }
-  //   }
-
-  //   // Trigger parent to stop loading spinner when search is done
-  //   if (!isLoading && !isError) {
-  //     onSearchComplete();
-  //   }
-  // }, [
-  //   checkIn,
-  //   checkOut,
-  //   totalRoomsNumber,
-  //   totalGuestsNumber,
-  //   isLoading,
-  //   roomsOffers,
-  // ]);
 
   // Trigger parent to stop loading spinner when search is done
   useEffect(() => {
