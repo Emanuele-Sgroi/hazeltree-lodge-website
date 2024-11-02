@@ -24,9 +24,7 @@ import {
   PaymentDetails,
 } from "@/components";
 import Image from "next/image";
-//import { useDeleteTempBooking } from "@/hooks/useDeleteTempBooking";
 import { useBooking } from "@/hooks/useBooking";
-//import { useBookingContext } from "@/context/BookingContext";
 import Link from "next/link";
 
 // Define the Zod schema with validations
@@ -161,64 +159,19 @@ const CheckoutForm = ({ totalPrice, bookingData, sessionId }) => {
             // Update temporary bookings to final bookings after successful payment
             if (bookingData?.bookingIds && bookingData.bookingIds.length > 0) {
               // Prepare the booking updates
-              // const bookingUpdates = bookingData.bookingIds.map(
-              //   (bookingId) => ({
-              //     id: bookingId,
-              //     status: "confirmed",
-              //     arrival: bookingData.checkIn,
-              //     departure: bookingData.checkOut,
-              //     numAdult: bookingData.totalGuestsNumber,
-              //     numChild: 0,
-              //     title: values.title,
-              //     firstName: values.firstName,
-              //     lastName: values.lastName,
-              //     email: values.email,
-              //     mobile: values.mobileNumber,
-              //     address: values.address,
-              //     city: values.city,
-              //     postcode: values.postcode,
-              //     country2: values.country,
-              //     notes: `Paid with Stripe: ${paymentIntentId}`,
-              //     comments: values.notes,
-              //     arrivalTime: values.arrivalTime,
-              //     flagColor: "0000ff",
-              //     flagText: "Paid",
-              //     //price: 100,
-              //     deposit: 100,
-              //     tax: 0,
-              //     commission: 0,
-              //     offerId: 1,
-              //     allowAutoAction: "enable",
-              //     actions: {
-              //       makeGroup: true,
-              //     },
-              //     price: 500, // Total price for the booking
-              //     invoiceItems: [
-              //       {
-              //         type: "charge",
-              //         description: "Room Charge",
-              //         qty: 1,
-              //         amount: 500, // Total charge amount
-              //       },
-              //       {
-              //         type: "payment",
-              //         description: "Paid via stripe",
-              //         amount: 500, // Amount paid by the guest
-              //       },
-              //     ],
-              //   })
-              // );
+              const totalGuestsNote = `Total Guests: ${bookingData.totalGuestsNumber}`;
+
               const bookingUpdates = bookingData.bookingIds.map(
                 (bookingId, index) => {
                   if (index === 0) {
                     // Primary Booking
-
                     const addNote =
                       bookingData.bookingIds.length > 1
                         ? `Payment of €${totalPrice} covers multiple rooms. Booking IDs: ${bookingData.bookingIds.join(
                             ", "
-                          )}. Paid with Stripe: ${paymentIntentId}`
+                          )}. ${totalGuestsNote}. Paid with Stripe: ${paymentIntentId}`
                         : `Paid with Stripe: ${paymentIntentId}`;
+
                     const addInvoiceDescription =
                       bookingData.bookingIds.length > 1
                         ? "Charges for Multiple Rooms"
@@ -232,7 +185,7 @@ const CheckoutForm = ({ totalPrice, bookingData, sessionId }) => {
                       status: "confirmed",
                       arrival: bookingData.checkIn,
                       departure: bookingData.checkOut,
-                      numAdult: bookingData.totalGuestsNumber,
+                      numAdult: bookingData.selectedRooms[index].guestCount, // Use specific guest count for this room
                       numChild: 0,
                       title: values.title,
                       firstName: values.firstName,
@@ -277,9 +230,10 @@ const CheckoutForm = ({ totalPrice, bookingData, sessionId }) => {
                     };
                   } else if (bookingData.bookingIds.length > 1 && index !== 0) {
                     // Secondary Bookings
+                    const totalGuestsNote = `Total Guests: ${bookingData.totalGuestsNumber}`;
                     const addNote =
                       bookingData.bookingIds.length > 1
-                        ? `Payment recorded under Booking ID ${bookingData.bookingIds[0]}. Paid with Stripe: ${paymentIntentId}`
+                        ? `Payment recorded under Booking ID ${bookingData.bookingIds[0]}. Paid with Stripe: ${paymentIntentId}. ${totalGuestsNote}`
                         : `Paid with Stripe: ${paymentIntentId}`;
 
                     return {
@@ -287,7 +241,7 @@ const CheckoutForm = ({ totalPrice, bookingData, sessionId }) => {
                       status: "confirmed",
                       arrival: bookingData.checkIn,
                       departure: bookingData.checkOut,
-                      numAdult: bookingData.totalGuestsNumber,
+                      numAdult: bookingData.selectedRooms[index].guestCount,
                       numChild: 0,
                       title: values.title,
                       firstName: values.firstName,

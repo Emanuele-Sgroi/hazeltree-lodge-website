@@ -45,7 +45,6 @@ const BookingSearchResults = ({
 
   // States for allocate rooms
   const [allocatedRooms, setAllocatedRooms] = useState([]);
-  const [isAllocatingRooms, setIsAllocatingRooms] = useState(true); // New state to track allocation progress
 
   // Allocate room
   useEffect(() => {

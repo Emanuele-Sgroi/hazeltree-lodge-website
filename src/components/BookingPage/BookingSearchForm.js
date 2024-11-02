@@ -29,8 +29,7 @@ import {
 } from "date-fns";
 import Modal from "react-modal";
 import classNames from "classnames";
-import { TfiClose } from "react-icons/tfi";
-import { PiWarningCircle, PiUsers } from "react-icons/pi";
+import { PiWarningCircle } from "react-icons/pi";
 import { IoClose, IoMoonOutline, IoBedOutline } from "react-icons/io5";
 import { MdOutlineCalendarMonth } from "react-icons/md";
 import { LiaLongArrowAltRightSolid } from "react-icons/lia";
@@ -143,8 +142,6 @@ const BookingSearchForm = ({
     if (initialSearchData) {
       setStartDate(new Date(initialSearchData.checkIn));
       setEndDate(new Date(initialSearchData.checkOut));
-      // setRoomsCount(initialSearchData.totalRoomsNumber);
-      //  setGuestsCount(initialSearchData.totalGuestsNumber);
       setNightsCount(initialSearchData.nightsCount);
     }
   }, [initialSearchData]);
@@ -161,7 +158,6 @@ const BookingSearchForm = ({
   const maxCheckinDate = addDays(maxBookingDate, -0);
 
   //total months for datapicker
-  //const totalMonths = differenceInCalendarMonths(maxCheckinDate, today) + 1;
   const totalMonths =
     differenceInCalendarMonths(
       addMonths(today, totalMonthsForCalendar),
@@ -269,7 +265,6 @@ const BookingSearchForm = ({
             <span className="text-[10px] md:text-xs font-light">{price}</span>
           )}
         {isUnavailable && !isValidCheckout && (
-          // <TfiClose className="absolute" color="red" />
           <span className="text-error-text absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl">
             X
           </span>
