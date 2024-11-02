@@ -41,8 +41,6 @@ const CheckoutCard = ({
   selectedRooms,
   setSelectedRooms,
   roomsLeftToSelect,
-  setRoomsLeftToSelect,
-  isShowingAlternatives,
   roomsRef,
 }) => {
   const [isCancellationPolicyModalOpen, setIsCancellationPolicyModalOpen] =
@@ -51,13 +49,7 @@ const CheckoutCard = ({
 
   const router = useRouter(); // Initialize router
 
-  const {
-    checkIn,
-    checkOut,
-    totalGuestsNumber,
-    totalRoomsNumber,
-    nightsCount,
-  } = searchData;
+  const { checkIn, checkOut } = searchData;
 
   const { checkInTime, checkOutTime, advantages, cancellationPolicy } =
     cmsResultData;
@@ -72,7 +64,6 @@ const CheckoutCard = ({
 
     if (removedRoom) {
       setSelectedRooms(selectedRooms.filter((room) => room.roomId !== roomId)); // Remove room
-      //setRoomsLeftToSelect((prev) => prev + 1); // Increment rooms left to select
     }
   };
 
@@ -106,8 +97,15 @@ const CheckoutCard = ({
         roomsRef,
         cmsResultData, // Room details, pricing, etc.
         timestamp: new Date().getTime(), // Store a timestamp for session expiration
-        totalGuestsNumber: searchData.totalGuestsNumber,
-        totalRoomsNumber: searchData.totalRoomsNumber,
+        totalGuestsNumber: selectedRooms.reduce(
+          (sum, room) => sum + room.guestCount,
+          0
+        ),
+        totalRoomsNumber: selectedRooms.length,
+        totalPrice: selectedRooms.reduce(
+          (sum, room) => sum + room.totalPrice,
+          0
+        ),
         nightsCount: searchData.nightsCount,
         checkIn: searchData.checkIn,
         checkOut: searchData.checkOut,
@@ -122,17 +120,9 @@ const CheckoutCard = ({
       // Redirect to checkout page with the session ID
       router.push(`/booking/checkout/${sessionId}`);
     } else {
-      // console.log("Can't get the booking IDs");
-      // Optionally, handle the error by informing the user
     }
   };
 
-  // Calculate total price
-  // const totalPrice = selectedRooms.reduce((sum, room) => {
-  //   const roomPricePerNight = parseFloat(room.calendar?.[0]?.price1) || 0;
-  //   const roomTotalPrice = roomPricePerNight * nightsCount;
-  //   return sum + roomTotalPrice;
-  // }, 0);
   // Calculate total rooms, total guests, and total price
   const totalRooms = selectedRooms.length;
   const totalGuests = selectedRooms.reduce(

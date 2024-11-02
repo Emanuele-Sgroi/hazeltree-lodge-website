@@ -31,8 +31,6 @@ import { FaCheck } from "react-icons/fa6";
 import { TiArrowSortedDown } from "react-icons/ti";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { BLOCKS, MARKS } from "@contentful/rich-text-types";
-import { useRouter } from "next/navigation"; // Import useRouter for navigation
-import { useTempBooking } from "@/hooks/useTempBooking";
 import {
   Popover,
   PopoverContent,

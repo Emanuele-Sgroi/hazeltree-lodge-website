@@ -262,10 +262,8 @@ const CheckoutWrapper = () => {
    * Destructure booking data.
    */
   const { searchData, selectedRooms } = bookingData;
-  const rooms = Array.isArray(selectedRooms) ? selectedRooms : [selectedRooms];
 
-  const { checkIn, checkOut, guests, totalRoomsNumber, nightsCount } =
-    searchData;
+  const { checkIn, checkOut, nightsCount } = searchData;
 
   /**
    * Calculate guests.
@@ -279,7 +277,27 @@ const CheckoutWrapper = () => {
    * Calculate total price.
    */
   const totalPrice = selectedRooms.reduce((sum, room) => {
-    const roomPricePerNight = parseFloat(room.calendar?.[0]?.price1) || 0;
+    let roomPricePerNight;
+
+    // Determine the correct price based on guestCount
+    if (room.guestCount === 2) {
+      roomPricePerNight = parseFloat(room.calendar?.[0].price1) || 0;
+    } else if (room.guestCount === 3) {
+      roomPricePerNight =
+        parseFloat(room.calendar?.[0].price2) ||
+        parseFloat(room.calendar?.[0].price1) ||
+        0;
+    } else if (room.guestCount === 4) {
+      roomPricePerNight =
+        parseFloat(room.calendar?.[0].price3) ||
+        parseFloat(room.calendar?.[0].price2) ||
+        parseFloat(room.calendar?.[0].price1) ||
+        0;
+    } else {
+      roomPricePerNight = parseFloat(room.calendar?.[0].price1) || 0; // Fallback
+    }
+
+    // Calculate total for the room and accumulate
     const roomTotalPrice = roomPricePerNight * nightsCount;
     return sum + roomTotalPrice;
   }, 0);
@@ -327,21 +345,42 @@ const CheckoutWrapper = () => {
 
         {/* Display selected rooms */}
         <div className="w-full flex flex-col ">
-          {selectedRooms.map((room, index) => (
-            <div key={index} className="flex flex-col border p-4 ">
-              <h6 className="text-lg md:text-xl font-bold">{room.name}</h6>
-              <p className="text-s md:text-base">
-                Price per night: €
-                {parseFloat(room.calendar?.[0]?.price1).toFixed(2)}
-              </p>
-              <p className="text-base">
-                Total for {nightsCount} night(s): €
-                {(parseFloat(room.calendar?.[0]?.price1) * nightsCount).toFixed(
-                  2
-                )}
-              </p>
-            </div>
-          ))}
+          {selectedRooms.map((room, index) => {
+            let roomPricePerNight;
+
+            // Determine the correct price based on guestCount
+            if (room.guestCount === 2) {
+              roomPricePerNight = parseFloat(room.calendar?.[0]?.price1) || 0;
+            } else if (room.guestCount === 3) {
+              roomPricePerNight =
+                parseFloat(room.calendar?.[0]?.price2) ||
+                parseFloat(room.calendar?.[0]?.price1) ||
+                0;
+            } else if (room.guestCount === 4) {
+              roomPricePerNight =
+                parseFloat(room.calendar?.[0]?.price3) ||
+                parseFloat(room.calendar?.[0]?.price2) ||
+                parseFloat(room.calendar?.[0]?.price1) ||
+                0;
+            } else {
+              roomPricePerNight = parseFloat(room.calendar?.[0]?.price1) || 0; // Fallback
+            }
+
+            // Calculate total for this room
+            const roomTotalPrice = roomPricePerNight * nightsCount;
+
+            return (
+              <div key={index} className="flex flex-col border p-4 ">
+                <h6 className="text-lg md:text-xl font-bold">{room.name}</h6>
+                <p className="text-s md:text-base">
+                  Price per night: €{roomPricePerNight.toFixed(2)}
+                </p>
+                <p className="text-base">
+                  Total for {nightsCount} night(s): €{roomTotalPrice.toFixed(2)}
+                </p>
+              </div>
+            );
+          })}
         </div>
 
         {/* Total Price */}
