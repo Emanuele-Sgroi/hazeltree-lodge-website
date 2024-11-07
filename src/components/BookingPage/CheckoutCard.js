@@ -80,6 +80,9 @@ const CheckoutCard = ({
       departure: searchData.checkOut, // Check-out date
       numAdult: room.guestsCount,
       numChild: 0, // Always 0, as no children are allowed
+      actions: {
+        makeGroup: true,
+      },
     }));
 
     // Call the createTempBooking function from the hook
