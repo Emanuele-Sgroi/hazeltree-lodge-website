@@ -12,6 +12,7 @@ import React, { useEffect, useState } from "react";
 import { useBeds24RoomsOffers } from "@/hooks/useBeds24RoomsOffers";
 import { RoomCard, CheckoutCard } from "@/components";
 import { format } from "date-fns";
+import { allocateRooms } from "@/utils/allocateRooms";
 
 /**
  * BookingSearchResults Component
@@ -42,6 +43,31 @@ const BookingSearchResults = ({
     isError,
   } = useBeds24RoomsOffers(checkIn, checkOut);
 
+  // States for allocate rooms
+  const [allocatedRooms, setAllocatedRooms] = useState([]);
+
+  // Allocate room
+  useEffect(() => {
+    if (!isLoading && roomsOffers.length > 0) {
+      // Clear previous allocations
+      setAllocatedRooms([]);
+
+      // Allocate rooms based on availability
+      const availableRooms = allocateRooms(
+        roomsOffers,
+        roomsRef,
+        checkIn,
+        checkOut
+      );
+      setAllocatedRooms(availableRooms);
+    }
+
+    // Trigger parent to stop loading spinner when search is done
+    if (!isLoading && !isError) {
+      onSearchComplete();
+    }
+  }, [checkIn, checkOut, isLoading, roomsOffers]);
+
   // States for handling rooms selections
   const [selectedRooms, setSelectedRooms] = useState([]);
 
@@ -56,21 +82,13 @@ const BookingSearchResults = ({
     return null; // Return null to keep the spinner visible in the parent
   }
 
-  if (isError) {
+  if (isError || allocatedRooms.length === 0) {
     return (
       <div className="w-full h-full p-4 justify-center items-center">
         <p className="text-center">
-          Failed to load room offers. Please try again later.
-        </p>
-      </div>
-    );
-  }
-
-  if (!isLoading && roomsOffers.length === 0) {
-    return (
-      <div className="w-full h-full p-4 justify-center items-center">
-        <p className="text-center">
-          No rooms available for your selected dates.
+          {isError
+            ? "Failed to load room offers. Please try again later."
+            : "No rooms available for your selected dates."}
         </p>
       </div>
     );
@@ -92,14 +110,14 @@ const BookingSearchResults = ({
         <div className="h-px w-full bg-[#2e3778] bg-opacity-20 my-2" />
 
         <p>
-          <span className="font-heavy">{roomsOffers.length}</span> room
-          {roomsOffers.length === 1 ? "" : "s"} available
+          <span className="font-heavy">{allocatedRooms.length}</span> room
+          {allocatedRooms.length === 1 ? "" : "s"} available
         </p>
       </div>
       {/* Display room cards */}
       <div className="max-sm:w-full flex sm:flex-grow flex-col sm:flex-row h-fit gap-4 sm:gap-2 xl:gap-4">
         <div className="flex flex-grow flex-col gap-4 xl:gap-6">
-          {roomsOffers.map((room) => {
+          {allocatedRooms.map((room) => {
             const cmsRoom = roomsRef.find(
               (cmsRoom) => String(cmsRoom.roomId) === String(room.roomId)
             );
