@@ -60,8 +60,8 @@ const ConfirmationWrapper = () => {
 
   // Set background images based on device type (mobile or desktop)
   const images = isMobile
-    ? homepage.heroSectionBackgroundImagesMobile[1]
-    : homepage.heroSectionBackgroundImages[1];
+    ? homepage.heroSectionBackgroundImagesMobile[0]
+    : homepage.heroSectionBackgroundImages[0];
 
   /**
    * Handle "Return to Homepage" action.
@@ -82,30 +82,16 @@ const ConfirmationWrapper = () => {
             <p className="mb-6">
               You will receive a confirmation email shortly.
             </p>
-            {/* Display single or multiple booking reference numbers */}
-            {bookingData.bookingIds.length === 1 ? (
-              <p className="mb-4">
-                <strong>Booking Reference:</strong> {bookingData.bookingIds[0]}
-              </p>
-            ) : (
-              <div className="mb-4">
-                <p className="mb-2">
-                  <strong>Booking References:</strong>
-                </p>
-                <ul className="list-disc list-inside mb-2">
-                  {bookingData.bookingIds.map((id, index) => (
-                    <li key={id}>
-                      <strong>Reference {index + 1}:</strong> {id}
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-sm text-gray-600">
-                  Each room has its own reference number.
-                </p>
-              </div>
-            )}
 
-            <p className="mb-6">
+            <p className="mb-4">
+              <strong>Booking Reference:</strong> {bookingData.bookingIds[0]}
+            </p>
+            <p className="text-sm text-gray-600">
+              Use this reference number for any inquiries regarding your
+              booking.
+            </p>
+
+            <p className="my-6">
               If you encounter any issues, please feel free to{" "}
               <Link
                 href="/contact"
