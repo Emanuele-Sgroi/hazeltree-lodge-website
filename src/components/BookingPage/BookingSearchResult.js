@@ -33,6 +33,7 @@ const BookingSearchResults = ({
   onSearchComplete,
   roomsRef,
   cmsResultData,
+  setIsRedirecting,
 }) => {
   const { checkIn, checkOut, nightsCount } = searchData;
 
@@ -141,6 +142,7 @@ const BookingSearchResults = ({
           selectedRooms={selectedRooms}
           setSelectedRooms={setSelectedRooms}
           roomsRef={roomsRef}
+          setIsRedirecting={setIsRedirecting}
         />
       </div>
     </section>

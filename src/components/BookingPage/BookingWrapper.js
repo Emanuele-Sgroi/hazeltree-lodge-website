@@ -38,6 +38,7 @@ const BookingWrapper = () => {
   const [scrollPosition, setScrollPosition] = useState(0); // For parallax effect
   const [searchData, setSearchData] = useState(null); // Store search data
   const [isLoadingSearch, setIsLoadingSearch] = useState(false); // Spinner state
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const maxBookingLimitMonths = content.dataPickerMaxBookingDateInMonths; //Update contentful
   const maxBookingDate = addMonths(new Date(), maxBookingLimitMonths);
@@ -129,77 +130,93 @@ const BookingWrapper = () => {
   const roomsRef = content?.roomsReference?.map((room) => room.fields);
 
   return (
-    <div className="w-full">
-      {/* Top section with background image, title, and description */}
-      <PageTopSection
-        bgImage={topImgUrl}
-        title={content.topSectionTitle}
-        description={content.topSectionDescription}
-      />
-      {/* booking search form component */}
-      <BookingSearchForm
-        showPrices={content.datePickerShowPrices}
-        infoText={content.datePickerPricesInfoText}
-        maxStay={content.datePickerMaximumStay}
-        dayCutoff={content.datePickerDayCutoff}
-        maxBookingDate={maxBookingDate}
-        totalMonthsForCalendar={content.dataPickerMaxBookingDateInMonths}
-        showAgeLimitText={content.guestsSelectionShowAgeLimitText}
-        ageLimitText={content.guestsSelectionAgeLimitText}
-        onSearch={handleSearch}
-        initialSearchData={searchData}
-      />
-      {/* Search result component */}
-      <div className="w-full min-h-[500px] justify-center">
-        {isLoadingSearch && (
-          <div className="w-full flex justify-center px-4 pb-12 lg:pb-16 pt-4 ">
-            <Image
-              src="/images/icons/spinner-dark-blue.png"
-              alt="Searching..."
-              width={30}
-              height={30}
-              quality={100}
-              className="animate-spin w-[30px] h-[30px]"
-            />
-          </div> // Display spinner when loading
-        )}
+    <>
+      <div className="w-full">
+        {/* Top section with background image, title, and description */}
+        <PageTopSection
+          bgImage={topImgUrl}
+          title={content.topSectionTitle}
+          description={content.topSectionDescription}
+        />
+        {/* booking search form component */}
+        <BookingSearchForm
+          showPrices={content.datePickerShowPrices}
+          infoText={content.datePickerPricesInfoText}
+          maxStay={content.datePickerMaximumStay}
+          dayCutoff={content.datePickerDayCutoff}
+          maxBookingDate={maxBookingDate}
+          totalMonthsForCalendar={content.dataPickerMaxBookingDateInMonths}
+          showAgeLimitText={content.guestsSelectionShowAgeLimitText}
+          ageLimitText={content.guestsSelectionAgeLimitText}
+          onSearch={handleSearch}
+          initialSearchData={searchData}
+        />
+        {/* Search result component */}
+        <div className="w-full min-h-[500px] justify-center">
+          {isLoadingSearch && (
+            <div className="w-full flex justify-center px-4 pb-12 lg:pb-16 pt-4 ">
+              <Image
+                src="/images/icons/spinner-dark-blue.png"
+                alt="Searching..."
+                width={30}
+                height={30}
+                quality={100}
+                className="animate-spin w-[30px] h-[30px]"
+              />
+            </div> // Display spinner when loading
+          )}
 
-        {!searchData && (
-          <div className="w-full flex flex-col justify-center px-4 pb-12 lg:pb-16 pt-4 relative overflow-hidden">
-            <p className="text-center">
-              No results yet. Please search for available rooms.
-            </p>
-            <FinalSection button={false} decoration={false} />
-            <Image
-              src={images.logo_text_blue2}
-              alt="Hazeltree Lodge"
-              width={0}
-              height={0}
-              className="absolute bottom-3  right-[-30%] 2xl:right-[-23%] w-auto h-[50px] sm:h-[60px] md:h-[85px] lg:h-[100px] xl:h-[115px] 2xl:h-[150px] opacity-8 z-0 transition-transform duration-75 ease-out"
-              style={{
-                transform: `translateX(${scrollPosition * -0.019}%)`,
-              }}
-            />
-          </div>
-        )}
+          {!searchData && (
+            <div className="w-full flex flex-col justify-center px-4 pb-12 lg:pb-16 pt-4 relative overflow-hidden">
+              <p className="text-center">
+                No results yet. Please search for available rooms.
+              </p>
+              <FinalSection button={false} decoration={false} />
+              <Image
+                src={images.logo_text_blue2}
+                alt="Hazeltree Lodge"
+                width={0}
+                height={0}
+                className="absolute bottom-3  right-[-30%] 2xl:right-[-23%] w-auto h-[50px] sm:h-[60px] md:h-[85px] lg:h-[100px] xl:h-[115px] 2xl:h-[150px] opacity-8 z-0 transition-transform duration-75 ease-out"
+                style={{
+                  transform: `translateX(${scrollPosition * -0.019}%)`,
+                }}
+              />
+            </div>
+          )}
 
-        {searchData && (
-          <BookingSearchResult
-            searchData={searchData}
-            roomsRef={roomsRef}
-            cmsResultData={cmsResultData}
-            onSearchComplete={handleSearchComplete} // Pass function to trigger when search is done
-          />
-        )}
+          {searchData && (
+            <BookingSearchResult
+              searchData={searchData}
+              roomsRef={roomsRef}
+              cmsResultData={cmsResultData}
+              onSearchComplete={handleSearchComplete} // Pass function to trigger when search is done
+              setIsRedirecting={setIsRedirecting}
+            />
+          )}
+        </div>
+
+        {/* faqs section in booking page */}
+        <BookingFaqSection
+          smallTitle={content.faqSectionSmallTitle}
+          mainTitle={content.faqSectionMainTitle}
+          faqsRef={faqsRef}
+        />
       </div>
 
-      {/* faqs section in booking page */}
-      <BookingFaqSection
-        smallTitle={content.faqSectionSmallTitle}
-        mainTitle={content.faqSectionMainTitle}
-        faqsRef={faqsRef}
-      />
-    </div>
+      {isRedirecting && (
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[999999999999]">
+          <Image
+            src="/images/icons/spinner-white.png"
+            alt="Please wait"
+            width={40}
+            height={40}
+            quality={100}
+            className="animate-spin"
+          />
+        </div>
+      )}
+    </>
   );
 };
 

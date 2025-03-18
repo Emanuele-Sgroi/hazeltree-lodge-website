@@ -33,16 +33,30 @@ export const useDeleteTempBooking = () => {
       return false;
     }
 
+    // Convert all IDs to numbers (in case they are strings)
+    const numericIds = bookingIds.map((id) => Number(id));
+    // Check if any failed to convert to a valid number
+    if (numericIds.some((val) => isNaN(val))) {
+      setError("Invalid booking IDs. Must be valid numbers.");
+      return false;
+    }
+
+    // For debugging: see what IDs we're sending
+    console.log("[useDeleteTempBooking] Deleting booking IDs:", numericIds);
+
     isDeletingRef.current = true;
     setIsLoading(true);
     setError(null);
 
     try {
       // Construct query parameters
-      const queryParams = bookingIds
+      const queryParams = numericIds
         .map((id) => `id=${encodeURIComponent(id)}`)
         .join("&");
       const url = `/api/delete-temp-booking?${queryParams}`;
+
+      // For debugging
+      console.log("[useDeleteTempBooking] DELETE request to:", url);
 
       const response = await fetch(url, {
         method: "DELETE",
@@ -59,6 +73,7 @@ export const useDeleteTempBooking = () => {
       }
 
       const result = await response.json();
+      console.log("[useDeleteTempBooking] Delete response:", result);
 
       if (result.success) {
         return true;
