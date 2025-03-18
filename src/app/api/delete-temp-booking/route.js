@@ -12,6 +12,44 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { getAccessToken } from "@/utils/tokenManager";
 
+async function cancelBookingsInBeds24(bookingIds, token) {
+  // This updates each booking ID to status: "cancelled".
+  // We'll reuse your existing Beds24 "update" logic.
+  // For example, you can do a POST to update-booking route with these updates:
+
+  const updates = bookingIds.map((id) => ({
+    id,
+    status: "cancelled",
+  }));
+
+  // Call the /api/v2/bookings endpoint with method POST
+  // or if you have a local route: /api/update-booking
+  const response = await fetch("https://beds24.com/api/v2/bookings", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      token,
+    },
+    body: JSON.stringify(updates),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(
+      `Failed to cancel bookings: ${errorData.message || response.statusText}`
+    );
+  }
+
+  const data = await response.json();
+  // data should be an array with .success or not
+  const allSuccess = data.every((res) => res.success === true);
+  if (!allSuccess) {
+    throw new Error("Some bookings could not be cancelled before deletion.");
+  }
+
+  return data;
+}
+
 /**
  * Utility function to delete temporary bookings in Beds24.
  *
@@ -21,6 +59,9 @@ import { getAccessToken } from "@/utils/tokenManager";
  */
 async function deleteBookingsInBeds24(bookingIds, token) {
   try {
+    //Flag booking to "cancelled" first
+    await cancelBookingsInBeds24(bookingIds, token);
+
     // Construct the query parameters
     const queryParams = bookingIds
       .map((id) => `id=${encodeURIComponent(id)}`)

@@ -42,10 +42,12 @@ const CheckoutCard = ({
   setSelectedRooms,
   roomsLeftToSelect,
   roomsRef,
+  setIsRedirecting,
 }) => {
   const [isCancellationPolicyModalOpen, setIsCancellationPolicyModalOpen] =
     useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isProceeding, setIsProceeding] = useState(false);
 
   const router = useRouter(); // Initialize router
 
@@ -73,9 +75,14 @@ const CheckoutCard = ({
    * Handle proceeding to the checkout process.
    */
   const handleProceedToCheckout = async () => {
+    // If already proceeding, ignore additional clicks
+    if (isProceeding) return;
+
+    setIsProceeding(true);
+
     const bookingData = selectedRooms.map((room) => ({
       roomId: room.roomId,
-      status: "inquiry", // Temporary status
+      status: "request", // Temporary status
       arrival: searchData.checkIn, // Check-in date
       departure: searchData.checkOut, // Check-out date
       numAdult: room.guestsCount,
@@ -121,9 +128,15 @@ const CheckoutCard = ({
       );
 
       // Redirect to checkout page with the session ID
-      router.push(`/booking/checkout/${sessionId}`);
+      //router.push(`/booking/checkout/${sessionId}`);
+      handleRedirectUserToCheckout(sessionId);
     } else {
     }
+  };
+
+  const handleRedirectUserToCheckout = (sessionId) => {
+    setIsRedirecting(true);
+    router.push(`/booking/checkout/${sessionId}`);
   };
 
   // Calculate total rooms, total guests, and total price
@@ -287,7 +300,7 @@ const CheckoutCard = ({
               <ButtonPrimary
                 text="BOOK NOW"
                 onClick={() => handleProceedToCheckout()}
-                disabled={roomsLeftToSelect > 0}
+                disabled={roomsLeftToSelect > 0 || isProceeding}
               />
 
               {isLoading && (

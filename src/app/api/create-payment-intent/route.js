@@ -10,9 +10,10 @@
 export const dynamic = "force-dynamic";
 
 import Stripe from "stripe";
+import { v4 as uuidv4 } from "uuid";
 
 // Initialize Stripe with the secret key from the environment variables
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_TEST_SECRET_KEY); // Use test in dev mode
 
 /**
  * API Route Handler for creating a PaymentIntent.
@@ -25,7 +26,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
  */
 export async function POST(request) {
   try {
-    const { amount } = await request.json(); // Extract the amount from the request body
+    const { amount, sessionId } = await request.json(); // Extract the amount from the request body
 
     // Validate the amount
     if (!amount || typeof amount !== "number") {
@@ -35,16 +36,25 @@ export async function POST(request) {
       );
     }
 
+    // Use the sessionId if present, otherwise generate a random key
+    const idempotencyKey = sessionId || uuidv4();
+
     // Create a PaymentIntent with the specified amount and currency (EUR in this case)
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency: "eur",
-      payment_method_types: ["card"],
-    });
+    const paymentIntent = await stripe.paymentIntents.create(
+      {
+        amount,
+        currency: "eur",
+        payment_method_types: ["card"],
+      },
+      { idempotencyKey }
+    );
 
     // Respond with the client secret needed for completing the payment
     return new Response(
-      JSON.stringify({ clientSecret: paymentIntent.client_secret }),
+      JSON.stringify({
+        paymentIntentId: paymentIntent.id,
+        clientSecret: paymentIntent.client_secret,
+      }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {

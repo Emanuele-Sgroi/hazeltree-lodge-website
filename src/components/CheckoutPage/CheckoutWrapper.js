@@ -20,7 +20,7 @@ import { useDeleteTempBooking } from "@/hooks/useDeleteTempBooking";
 
 // Initialize Stripe
 const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  process.env.NEXT_PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY
 );
 
 /**
@@ -38,11 +38,55 @@ const CheckoutWrapper = () => {
   const [isExpired, setIsExpired] = useState(false);
   const [timeLeft, setTimeLeft] = useState(null);
   const { deleteTempBooking, isLoading, error } = useDeleteTempBooking();
+  const [bookingComplete, setBookingComplete] = useState(false);
+  const [isGoingToEdit, setIsGoingToEdit] = useState(false);
 
   // Ref to store previous pathname
   const prevPathname = useRef(pathname);
   // Ref to prevent multiple deletions
   const deletionTriggered = useRef(false);
+
+  useEffect(() => {
+    function onBeforeUnload(e) {
+      // If user already completed or we triggered deletion, skip
+      if (bookingComplete || deletionTriggered.current) {
+        return;
+      }
+
+      // Show a synchronous confirm
+      const message = "Are you sure you want to leave this page?";
+      const userWantsToLeave = window.confirm(message);
+
+      if (!userWantsToLeave) {
+        // user pressed CANCEL => block navigation
+        e.preventDefault();
+        e.returnValue = false;
+        return false; // for older browsers
+      }
+
+      // user pressed OK => do final delete quickly
+      if (bookingData?.bookingIds?.length) {
+        deletionTriggered.current = true;
+        try {
+          const body = JSON.stringify({ bookingIds: bookingData.bookingIds });
+          navigator.sendBeacon(
+            "/api/delete-temp-booking",
+            new Blob([body], { type: "application/json" })
+          );
+          sessionStorage.removeItem(`checkout_${id}`);
+        } catch (err) {
+          console.error("Beacon final delete failed:", err);
+        }
+      }
+      // return undefined to let the unload proceed
+      return undefined;
+    }
+
+    window.onbeforeunload = onBeforeUnload;
+    return () => {
+      window.onbeforeunload = null;
+    };
+  }, [bookingData, bookingComplete, id]);
 
   /**
    * Fetch booking data from sessionStorage on component mount.
@@ -106,6 +150,7 @@ const CheckoutWrapper = () => {
    * Delete temporary bookings and redirect to booking page.
    */
   const handleBack = () => {
+    setIsGoingToEdit(true);
     if (
       bookingData &&
       bookingData.bookingIds &&
@@ -391,9 +436,9 @@ const CheckoutWrapper = () => {
           <button
             className="py-2 px-4 rounded-md bg-dark-blue text-white transform active:scale-95 disabled:active:scale-100 disabled:opacity-50"
             onClick={handleBack}
-            disabled={isLoading} // Disable button while deletion is in progress
+            disabled={isLoading || isGoingToEdit} // Disable button while deletion is in progress
           >
-            {isLoading ? "Loading..." : "Edit Booking"}
+            {isLoading || isGoingToEdit ? "Loading..." : "Edit Booking"}
           </button>
         </div>
       </div>
@@ -403,6 +448,7 @@ const CheckoutWrapper = () => {
             totalPrice={totalPrice}
             bookingData={bookingData}
             sessionId={id}
+            setBookingComplete={setBookingComplete}
           />
         </Elements>
       </div>
