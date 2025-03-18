@@ -13,7 +13,7 @@ import Stripe from "stripe";
 import { v4 as uuidv4 } from "uuid";
 
 // Initialize Stripe with the secret key from the environment variables
-const stripe = new Stripe(process.env.STRIPE_TEST_SECRET_KEY); // Use test in dev mode
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY); // Use test in dev mode
 
 /**
  * API Route Handler for creating a PaymentIntent.
