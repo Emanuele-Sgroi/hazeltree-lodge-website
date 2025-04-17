@@ -18,10 +18,15 @@ import { loadStripe } from "@stripe/stripe-js";
 import CheckoutForm from "@/components/CheckoutPage/CheckoutForm";
 import { useDeleteTempBooking } from "@/hooks/useDeleteTempBooking";
 
-// Initialize Stripe
+// Initialize Stripe - TEST
 const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  process.env.NEXT_PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY
 );
+
+// Initialize Stripe
+// const stripePromise = loadStripe(
+//   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+// );
 
 /**
  * CheckoutWrapper Component
@@ -40,16 +45,50 @@ const CheckoutWrapper = () => {
   const { deleteTempBooking, isLoading, error } = useDeleteTempBooking();
   const [bookingComplete, setBookingComplete] = useState(false);
   const [isGoingToEdit, setIsGoingToEdit] = useState(false);
+  // State to check if it's submittig payments
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
+  const isSubmittingPaymentRef = useRef(false);
 
   // Ref to store previous pathname
   const prevPathname = useRef(pathname);
   // Ref to prevent multiple deletions
   const deletionTriggered = useRef(false);
 
+  const handleSetIsSubmittingPayment = (value) => {
+    isSubmittingPaymentRef.current = value;
+    setIsSubmittingPayment(value);
+  };
+
+  useEffect(() => {
+    if (!id) return;
+
+    (async () => {
+      try {
+        const res = await fetch(`/api/checkout-status/${id}`);
+        const info = await res.json();
+
+        if (info.status === "paid") {
+          router.replace(`/booking/confirmation/${id}`);
+          return;
+        }
+        if (info.status === "expired") {
+          setIsExpired(true); // triggers your existing “Session expired” UI
+        }
+        // if pending → keep rendering the checkout form as usual
+      } catch (err) {
+        console.error("status check failed", err);
+      }
+    })();
+  }, [id, router]);
+
   useEffect(() => {
     function onBeforeUnload(e) {
       // If user already completed or we triggered deletion, skip
-      if (bookingComplete || deletionTriggered.current) {
+      if (
+        bookingComplete ||
+        deletionTriggered.current ||
+        isSubmittingPaymentRef.current
+      ) {
         return;
       }
 
@@ -208,6 +247,7 @@ const CheckoutWrapper = () => {
       // Only execute if deletion has not already been triggered
       if (
         !deletionTriggered.current &&
+        !isSubmittingPaymentRef.current &&
         bookingData &&
         bookingData.bookingIds &&
         bookingData.bookingIds.length > 0
@@ -449,6 +489,7 @@ const CheckoutWrapper = () => {
             bookingData={bookingData}
             sessionId={id}
             setBookingComplete={setBookingComplete}
+            setIsSubmittingPayment={handleSetIsSubmittingPayment}
           />
         </Elements>
       </div>

@@ -63,6 +63,7 @@ const CheckoutForm = ({
   bookingData,
   sessionId,
   setBookingComplete,
+  setIsSubmittingPayment,
 }) => {
   const router = useRouter();
   const stripe = useStripe();
@@ -118,6 +119,7 @@ const CheckoutForm = ({
         body: JSON.stringify({
           amount: totalPriceInCents,
           sessionId, // pass unique session ID
+          bookingIds: bookingData.bookingIds,
         }),
       });
       const data = await res.json();
@@ -144,6 +146,7 @@ const CheckoutForm = ({
    * @param {object} values - Form values submitted by the user
    */
   const handleSubmit = async (values) => {
+    setIsSubmittingPayment(true);
     if (!stripe || !elements) {
       return;
     }
@@ -184,6 +187,8 @@ const CheckoutForm = ({
           paymentIntentId,
           paymentMethodId: paymentMethod.id,
           bookingData,
+          sessionId,
+          guestValues: values,
         }),
       });
 
