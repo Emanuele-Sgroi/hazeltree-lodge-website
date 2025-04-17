@@ -24,6 +24,7 @@ import {
   isSameDay,
   setHours,
   setMinutes,
+  differenceInCalendarDays,
   differenceInCalendarMonths,
   addMonths,
 } from "date-fns";
@@ -164,36 +165,66 @@ const BookingSearchForm = ({
       today
     ) + 1;
 
+  const canBeCheckout = (date) => {
+    if (!startDate) return false; // no check‑in yet
+
+    // number of *calendar* days between the two dates
+    const diff = differenceInCalendarDays(date, startDate);
+    return diff > 0 && diff <= maxStay;
+  };
+
+  // disable dates that are not available
+  // const isDateDisabled = (date) => {
+  //   const formattedDate = format(date, "yyyy-MM-dd");
+
+  //   // Check if any room is unavailable on this date
+  //   const isUnavailable = availabilityData?.data?.every(
+  //     (room) => room.availability[formattedDate] === false
+  //   );
+
+  //   // Disable today if past the same-day cutoff
+  //   const isTodayAfterCutoff =
+  //     isSameDay(date, today) && new Date() > sameDayCutoff;
+  //   const isPastDate = date < today.setHours(0, 0, 0, 0) || isTodayAfterCutoff;
+
+  //   // Disable dates beyond maxBookingDate
+  //   const isBeyondMaxBookingDate = date > maxCheckinDate;
+
+  //   // Check if this is the first unavailable day in a sequence
+  //   const previousDate = addDays(date, -1);
+  //   const isPreviousDayAvailable = availabilityData?.data?.some(
+  //     (room) => room.availability[format(previousDate, "yyyy-MM-dd")] === true
+  //   );
+  //   const isFirstUnavailableDay = isUnavailable && isPreviousDayAvailable;
+
+  //   // Ensure it's a valid checkout only if within "maxStay" days of check-in
+  //   const isWithinFiveDays =
+  //     startDate &&
+  //     differenceInDays(date, startDate) <= maxStay &&
+  //     differenceInDays(date, startDate) > 0;
+  //   const isValidCheckout = isFirstUnavailableDay && isWithinFiveDays;
+  //   return (
+  //     isPastDate ||
+  //     isBeyondMaxBookingDate ||
+  //     (isUnavailable && !isValidCheckout)
+  //   );
+  // };
+
   // disable dates that are not available
   const isDateDisabled = (date) => {
     const formattedDate = format(date, "yyyy-MM-dd");
-
-    // Check if any room is unavailable on this date
     const isUnavailable = availabilityData?.data?.every(
       (room) => room.availability[formattedDate] === false
     );
 
-    // Disable today if past the same-day cutoff
     const isTodayAfterCutoff =
       isSameDay(date, today) && new Date() > sameDayCutoff;
     const isPastDate = date < today.setHours(0, 0, 0, 0) || isTodayAfterCutoff;
-
-    // Disable dates beyond maxBookingDate
     const isBeyondMaxBookingDate = date > maxCheckinDate;
 
-    // Check if this is the first unavailable day in a sequence
-    const previousDate = addDays(date, -1);
-    const isPreviousDayAvailable = availabilityData?.data?.some(
-      (room) => room.availability[format(previousDate, "yyyy-MM-dd")] === true
-    );
-    const isFirstUnavailableDay = isUnavailable && isPreviousDayAvailable;
+    // NEW: allow an “unavailable” day if it can legally be the check‑out
+    const isValidCheckout = canBeCheckout(date);
 
-    // Ensure it's a valid checkout only if within "maxStay" days of check-in
-    const isWithinFiveDays =
-      startDate &&
-      differenceInDays(date, startDate) <= maxStay &&
-      differenceInDays(date, startDate) > 0;
-    const isValidCheckout = isFirstUnavailableDay && isWithinFiveDays;
     return (
       isPastDate ||
       isBeyondMaxBookingDate ||
@@ -208,11 +239,76 @@ const BookingSearchForm = ({
   };
 
   //custom component for the day in the date picker
+  // const renderDayContents = (day, date) => {
+  //   const price = getPriceForDate(date);
+  //   const formattedDate = format(date, "yyyy-MM-dd");
+
+  //   // Check if all rooms are unavailable for this date
+  //   const isUnavailable = availabilityData?.data?.every(
+  //     (room) => room.availability[formattedDate] === false
+  //   );
+
+  //   const isTodayAfterCutoff =
+  //     isSameDay(date, today) && new Date() > sameDayCutoff;
+  //   const isPastDate = date < today.setHours(0, 0, 0, 0) || isTodayAfterCutoff;
+
+  //   const isSelectedStart =
+  //     startDate && date.toDateString() === startDate.toDateString();
+  //   const isSelectedEnd =
+  //     endDate && date.toDateString() === endDate.toDateString();
+  //   const isInRange =
+  //     startDate && endDate && date > startDate && date < endDate;
+
+  //   // Check if this is the first unavailable day in a sequence
+  //   const previousDate = addDays(date, -1);
+  //   const isPreviousDayAvailable = availabilityData?.data?.some(
+  //     (room) => room.availability[format(previousDate, "yyyy-MM-dd")] === true
+  //   );
+  //   const isFirstUnavailableDay = isUnavailable && isPreviousDayAvailable;
+
+  //   // Ensure it's a valid checkout only if within "maxStay" days of check-in
+  //   const isWithinFiveDays =
+  //     startDate &&
+  //     differenceInDays(date, startDate) <= maxStay &&
+  //     differenceInDays(date, startDate) > 0;
+  //   const isValidCheckout = isFirstUnavailableDay && isWithinFiveDays;
+
+  //   const dayClass = classNames({
+  //     "react-datepicker__day--selected": isSelectedStart || isSelectedEnd,
+  //     "react-datepicker__day--range-start": isSelectedStart,
+  //     "react-datepicker__day--range-end": isSelectedEnd,
+  //     "react-datepicker__day--in-range": isInRange,
+  //     "react-datepicker__day--disabled":
+  //       isPastDate ||
+  //       (isUnavailable && !isValidCheckout) ||
+  //       date > maxCheckinDate,
+  //     "react-datepicker__day--unavailable":
+  //       isUnavailable && !isValidCheckout && !isFirstUnavailableDay,
+  //   });
+
+  //   return (
+  //     <div className={`react-datepicker__day ${dayClass} relative`}>
+  //       <span className="max-md:text-xs">{day}</span>
+  //       {showPrices &&
+  //         price &&
+  //         !isPastDate &&
+  //         (!isUnavailable || isValidCheckout) && (
+  //           <span className="text-[10px] md:text-xs font-light">{price}</span>
+  //         )}
+  //       {isUnavailable && !isValidCheckout && (
+  //         <span className="text-error-text absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl">
+  //           X
+  //         </span>
+  //       )}
+  //     </div>
+  //   );
+  // };
+  // ─── Day cell renderer for react‑datepicker ─────────────────────────────
   const renderDayContents = (day, date) => {
     const price = getPriceForDate(date);
     const formattedDate = format(date, "yyyy-MM-dd");
 
-    // Check if all rooms are unavailable for this date
+    // 1) availability & generic flags ───────────────────────────────
     const isUnavailable = availabilityData?.data?.every(
       (room) => room.availability[formattedDate] === false
     );
@@ -221,6 +317,7 @@ const BookingSearchForm = ({
       isSameDay(date, today) && new Date() > sameDayCutoff;
     const isPastDate = date < today.setHours(0, 0, 0, 0) || isTodayAfterCutoff;
 
+    // 2) range‑selection flags ──────────────────────────────────────
     const isSelectedStart =
       startDate && date.toDateString() === startDate.toDateString();
     const isSelectedEnd =
@@ -228,20 +325,10 @@ const BookingSearchForm = ({
     const isInRange =
       startDate && endDate && date > startDate && date < endDate;
 
-    // Check if this is the first unavailable day in a sequence
-    const previousDate = addDays(date, -1);
-    const isPreviousDayAvailable = availabilityData?.data?.some(
-      (room) => room.availability[format(previousDate, "yyyy-MM-dd")] === true
-    );
-    const isFirstUnavailableDay = isUnavailable && isPreviousDayAvailable;
+    // 3) allow an unavailable day to act as check‑out if helper says so
+    const isValidCheckout = canBeCheckout(date);
 
-    // Ensure it's a valid checkout only if within "maxStay" days of check-in
-    const isWithinFiveDays =
-      startDate &&
-      differenceInDays(date, startDate) <= maxStay &&
-      differenceInDays(date, startDate) > 0;
-    const isValidCheckout = isFirstUnavailableDay && isWithinFiveDays;
-
+    // 4) class map for react‑datepicker styling
     const dayClass = classNames({
       "react-datepicker__day--selected": isSelectedStart || isSelectedEnd,
       "react-datepicker__day--range-start": isSelectedStart,
@@ -251,21 +338,23 @@ const BookingSearchForm = ({
         isPastDate ||
         (isUnavailable && !isValidCheckout) ||
         date > maxCheckinDate,
-      "react-datepicker__day--unavailable":
-        isUnavailable && !isValidCheckout && !isFirstUnavailableDay,
+      "react-datepicker__day--unavailable": isUnavailable && !isValidCheckout,
     });
 
+    // 5) rendered cell
     return (
       <div className={`react-datepicker__day ${dayClass} relative`}>
         <span className="max-md:text-xs">{day}</span>
+
         {showPrices &&
           price &&
           !isPastDate &&
           (!isUnavailable || isValidCheckout) && (
             <span className="text-[10px] md:text-xs font-light">{price}</span>
           )}
+
         {isUnavailable && !isValidCheckout && (
-          <span className="text-error-text absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl">
+          <span className="text-error-text absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xl">
             X
           </span>
         )}

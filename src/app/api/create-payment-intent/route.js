@@ -11,9 +11,15 @@ export const dynamic = "force-dynamic";
 
 import Stripe from "stripe";
 import { v4 as uuidv4 } from "uuid";
+import crypto from "crypto";
+import { redis } from "@/lib/redis";
+
+// for testing
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 // Initialize Stripe with the secret key from the environment variables
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY); // Use test in dev mode
+//const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+//const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 /**
  * API Route Handler for creating a PaymentIntent.
@@ -26,7 +32,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY); // Use test in dev mod
  */
 export async function POST(request) {
   try {
-    const { amount, sessionId } = await request.json(); // Extract the amount from the request body
+    //const { amount, sessionId } = await request.json(); // Extract the amount from the request body
+    const { amount, sessionId, bookingIds = [] } = await request.json();
 
     // Validate the amount
     if (!amount || typeof amount !== "number") {
@@ -37,7 +44,14 @@ export async function POST(request) {
     }
 
     // Use the sessionId if present, otherwise generate a random key
-    const idempotencyKey = sessionId || uuidv4();
+    //const idempotencyKey = sessionId || uuidv4();
+    const idempotencyKey = sessionId
+      ? `payment_${crypto
+          .createHash("sha256")
+          .update(sessionId)
+          .digest("hex")
+          .slice(0, 16)}`
+      : `payment_${uuidv4()}`;
 
     // Create a PaymentIntent with the specified amount and currency (EUR in this case)
     const paymentIntent = await stripe.paymentIntents.create(
@@ -45,9 +59,33 @@ export async function POST(request) {
         amount,
         currency: "eur",
         payment_method_types: ["card"],
+        metadata: {
+          sessionId,
+          bookingIds: bookingIds.join(","), // handy for the webhook
+        },
       },
       { idempotencyKey }
     );
+
+    /* -------- SAVE PENDING STATUS IN REDIS -------- */
+    const expiresAt = Date.now() + 20 * 60 * 1000; // 20 minutes
+    const pendingKey = `pending:${sessionId}`;
+
+    /* store as a plain string and let Redis delete it after 20 min */
+    await redis.set(
+      pendingKey,
+      JSON.stringify({
+        sessionId,
+        paymentIntentId: paymentIntent.id,
+        bookingIds,
+        totalPrice: amount / 100,
+        expiresAt,
+        status: "pending",
+      }),
+      { ex: 60 * 20, nx: true } // ex = TTL in seconds
+    );
+
+    /* ---------------------------------------------- */
 
     // Respond with the client secret needed for completing the payment
     return new Response(
