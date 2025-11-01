@@ -118,19 +118,30 @@ const CheckoutForm = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: totalPriceInCents,
-          sessionId, // pass unique session ID
+          sessionId,
           bookingIds: bookingData.bookingIds,
         }),
       });
       const data = await res.json();
       if (res.ok) {
         setPaymentIntentId(data.paymentIntentId);
+
+        // Store paymentIntentId in sessionStorage for status checks
+        const storedData = sessionStorage.getItem(`checkout_${sessionId}`);
+        if (storedData) {
+          const parsedData = JSON.parse(storedData);
+          parsedData.paymentIntentId = data.paymentIntentId;
+          sessionStorage.setItem(
+            `checkout_${sessionId}`,
+            JSON.stringify(parsedData)
+          );
+        }
       } else {
         console.log("error while calling payment intent");
       }
     }
     createIntent();
-  }, [totalPrice, sessionId]);
+  }, [totalPrice, sessionId, bookingData.bookingIds]);
 
   /**
    * Generate invoice number with today's date
