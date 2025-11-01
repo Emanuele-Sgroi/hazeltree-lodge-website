@@ -1,6 +1,5 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
-import { redis } from "@/lib/redis";
 import { buildBookingUpdates } from "@/lib/buildBookingUpdates";
 import { updateBeds24ServerSide } from "@/lib/beds24";
 
@@ -30,18 +29,7 @@ export async function POST(req) {
 
     /* 3. Success path */
     if (paymentIntent.status === "succeeded") {
-      /* 3a. mark Redis = paid */
-      if (sessionId) {
-        const key = `pending:${sessionId}`;
-        const raw = await redis.get(key);
-        if (raw) {
-          const rec = typeof raw === "string" ? JSON.parse(raw) : raw;
-          rec.status = "paid";
-          await redis.set(key, JSON.stringify(rec), { ex: 60 * 20 });
-        }
-      }
-
-      /* 3b. Build booking updates and send to Beds24 */
+      /* Build booking updates and send to Beds24 */
       try {
         const bookingUpdates = buildBookingUpdates({
           bookingData,

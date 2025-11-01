@@ -1,34 +1,35 @@
-import { redis } from "@/lib/redis";
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function GET(req, { params }) {
-  const key = `pending:${params.sessionId}`;
-  const raw = await redis.get(key);
+  try {
+    const { sessionId } = params;
 
-  // ✅ Only parse if it's a string
-  const rec = typeof raw === "string" ? JSON.parse(raw) : raw;
+    // Get paymentIntentId from query params
+    const { searchParams } = new URL(req.url);
+    const paymentIntentId = searchParams.get("paymentIntentId");
 
-  if (!rec) return NextResponse.json({ status: "not_found" });
+    if (!paymentIntentId) {
+      return NextResponse.json({ status: "not_found" });
+    }
 
-  if (rec.status === "paid") return NextResponse.json({ status: "paid" });
-  if (rec.status === "expired") return NextResponse.json({ status: "expired" });
+    // Check Stripe for payment status
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-  if (Date.now() > rec.expiresAt) {
-    rec.status = "expired";
-    await redis.set(key, JSON.stringify(rec), { ex: 60 * 20 });
-    return NextResponse.json({ status: "expired" });
+    if (paymentIntent.status === "succeeded") {
+      return NextResponse.json({ status: "paid" });
+    }
+
+    if (paymentIntent.status === "canceled") {
+      return NextResponse.json({ status: "expired" });
+    }
+
+    // Any other status is considered pending
+    return NextResponse.json({ status: "pending" });
+  } catch (error) {
+    console.error("Error checking payment status:", error);
+    return NextResponse.json({ status: "not_found" }, { status: 404 });
   }
-
-  /* still pending → double-check with Stripe */
-  const pi = await stripe.paymentIntents.retrieve(rec.paymentIntentId);
-  if (pi.status === "succeeded") {
-    rec.status = "paid";
-    await redis.set(key, JSON.stringify(rec), { ex: 60 * 20 });
-    return NextResponse.json({ status: "paid" });
-  }
-
-  return NextResponse.json({ status: "pending" });
 }
