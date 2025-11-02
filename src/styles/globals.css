@@ -61,7 +61,7 @@
 
   /* Background */
   --color-background-primary: #fff;
-  --color-background-secondary: #f8f7f6;
+  --color-background-secondary: #f9f7f4;
   --color-background-tertiary: #2e3778;
   --color-transparent-bottom: hsla(119, 39%, 34%, 0.12);
   --color-transparent-top: hsla(33, 31%, 11%, 0.5);
@@ -75,6 +75,7 @@
   --color-accent-orange: #e38d30;
   --color-accent-beige: #f1ead1;
   --color-accent-cyan: #017aa2;
+  --color-accent-brown: #8b7355;
   /* Secondary */
   --color-secondary-grey: #a8a8a8;
   --color-text-error: #d32f2f;

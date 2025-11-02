@@ -119,7 +119,7 @@ const LocalActivitiesSection = () => {
       </div>
 
       {/* Decorative wave shape */}
-      <div className="custom-shape-divider-top-1724970874">
+      {/* <div className="custom-shape-divider-top-1724970874">
         <svg
           data-name="Layer 1"
           xmlns="http://www.w3.org/2000/svg"
@@ -141,7 +141,8 @@ const LocalActivitiesSection = () => {
             className="shape-fill"
           ></path>
         </svg>
-      </div>
+      </div> */}
+
       {/* Background overlay and image */}
       <div className="overlay-layer2 h-full z-[2]" />
       <div
