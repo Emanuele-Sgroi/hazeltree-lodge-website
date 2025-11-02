@@ -73,7 +73,6 @@ const CheckoutForm = ({
   const [isCheckingError, setIsCheckingError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const { createBooking, updateBooking, isLoading, error } = useBooking();
-  //const { setBookingDetails } = useBookingContext();
   const [paymentIntentId, setPaymentIntentId] = useState(null);
 
   const form = useForm({
@@ -118,26 +117,36 @@ const CheckoutForm = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: totalPriceInCents,
-          sessionId, // pass unique session ID
+          sessionId,
           bookingIds: bookingData.bookingIds,
         }),
       });
       const data = await res.json();
       if (res.ok) {
         setPaymentIntentId(data.paymentIntentId);
+
+        // Store paymentIntentId in sessionStorage for status checks
+        const storedData = sessionStorage.getItem(`checkout_${sessionId}`);
+        if (storedData) {
+          const parsedData = JSON.parse(storedData);
+          parsedData.paymentIntentId = data.paymentIntentId;
+          sessionStorage.setItem(
+            `checkout_${sessionId}`,
+            JSON.stringify(parsedData)
+          );
+        }
       } else {
         console.log("error while calling payment intent");
       }
     }
     createIntent();
-  }, [totalPrice, sessionId]);
+  }, [totalPrice, sessionId, bookingData.bookingIds]);
 
   /**
    * Generate invoice number with today's date
    * @param {object} values - Invoice number
    */
   function generateInvoiceNumber() {
-    // Simple example using timestamp
     return `INV-${Date.now()}`;
   }
 
@@ -152,7 +161,6 @@ const CheckoutForm = ({
     }
 
     if (!paymentIntentId) {
-      // If paymentIntentId still isn't set, handle it gracefully
       console.error("paymentIntentId not ready yet");
       return;
     }
@@ -162,7 +170,7 @@ const CheckoutForm = ({
     setErrorMessage("");
 
     try {
-      // Create a PaymentMethod from the card element
+      // Create PaymentMethod from card details
       const { paymentMethod, error: pmError } =
         await stripe.createPaymentMethod({
           type: "card",
@@ -179,7 +187,7 @@ const CheckoutForm = ({
         return;
       }
 
-      //  Confirm the PaymentIntent on the server
+      // Confirm payment on server
       const confirmRes = await fetch("/api/confirm-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -193,31 +201,45 @@ const CheckoutForm = ({
       });
 
       const confirmData = await confirmRes.json();
-      if (!confirmRes.ok || !confirmData.success) {
+
+      let returnedPaymentIntentId = "UNKNOWN_ID";
+
+      // Handle 3D Secure if required
+      if (confirmData.requiresAction && confirmData.clientSecret) {
+        const { error: confirmError, paymentIntent: confirmedPaymentIntent } =
+          await stripe.confirmCardPayment(confirmData.clientSecret);
+
+        if (confirmError) {
+          setIsCheckingError(true);
+          setErrorMessage(confirmError.message || "Authentication failed");
+          setIsCheckingIn(false);
+          return;
+        }
+
+        if (confirmedPaymentIntent.status !== "succeeded") {
+          setIsCheckingError(true);
+          setErrorMessage("Payment could not be completed");
+          setIsCheckingIn(false);
+          return;
+        }
+
+        returnedPaymentIntentId = confirmedPaymentIntent.id;
+      } else if (!confirmRes.ok || !confirmData.success) {
         setIsCheckingError(true);
         setErrorMessage(confirmData.error || "Payment confirmation failed");
         setIsCheckingIn(false);
         return;
+      } else {
+        returnedPaymentIntentId = confirmData.paymentIntentId || "UNKNOWN_ID";
       }
 
-      //  If server says "payment succeeded", we proceed with existing Beds24 code
-      //    The server route returns paymentIntentId so we can store or log it.
-      const returnedPaymentIntentId =
-        confirmData.paymentIntentId || "UNKNOWN_ID";
-
-      // ==============================
-      // BEDS24: EXISTING CODE UNCHANGED
-      // ==============================
-      // (We leave your code that updates Beds24, sets the status to "confirmed", etc.)
-      // Just as you had it:
-
+      // Update Beds24 bookings
       if (bookingData?.bookingIds && bookingData.bookingIds.length > 0) {
         const totalGuestsNote = `Total Guests: ${bookingData.totalGuestsNumber}`;
 
         const bookingUpdates = bookingData.bookingIds.map(
           (bookingId, index) => {
             if (index === 0) {
-              // Primary Booking
               const addNote =
                 bookingData.bookingIds.length > 1
                   ? `Payment of €${totalPrice} covers multiple rooms. Booking IDs: ${bookingData.bookingIds.join(
@@ -230,7 +252,7 @@ const CheckoutForm = ({
                   ? "Charges for Multiple Rooms"
                   : "Room Charges";
 
-              const invoiceNumber = generateInvoiceNumber(); // define or import this
+              const invoiceNumber = generateInvoiceNumber();
               const invoiceDate = new Date().toISOString().split("T")[0];
 
               return {
@@ -282,12 +304,7 @@ const CheckoutForm = ({
                 ],
               };
             } else if (bookingData.bookingIds.length > 1 && index !== 0) {
-              // Secondary Bookings
-              const totalGuestsNote = `Total Guests: ${bookingData.totalGuestsNumber}`;
-              const addNote =
-                bookingData.bookingIds.length > 1
-                  ? `Payment recorded under Booking ID ${bookingData.bookingIds[0]}. Paid with Stripe: ${returnedPaymentIntentId}. ${totalGuestsNote}`
-                  : `Paid with Stripe: ${returnedPaymentIntentId}`;
+              const addNote = `Payment recorded under Booking ID ${bookingData.bookingIds[0]}. Paid with Stripe: ${returnedPaymentIntentId}. ${totalGuestsNote}`;
 
               return {
                 id: bookingId,
@@ -342,18 +359,16 @@ const CheckoutForm = ({
             `checkout_${sessionId}`,
             JSON.stringify(updatedData)
           );
-
-          // router.replace(`/booking/confirmation/${sessionId}`);
           handleSendUserToConfirmationPage(sessionId);
         } else {
           setIsCheckingError(true);
           setErrorMessage("Something went wrong.");
         }
       }
-      // ============== END BEDS24 CODE ==============
     } catch (error) {
       setIsCheckingError(true);
       setErrorMessage(error.message || "An unexpected error occurred.");
+      setIsCheckingIn(false);
     }
   };
 

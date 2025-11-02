@@ -12,9 +12,11 @@ export const dynamic = "force-dynamic";
 import Stripe from "stripe";
 import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
-import { redis } from "@/lib/redis";
 
-// for testing
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error("STRIPE_SECRET_KEY is not set in environment variables");
+}
+
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 // Initialize Stripe with the secret key from the environment variables
@@ -66,26 +68,6 @@ export async function POST(request) {
       },
       { idempotencyKey }
     );
-
-    /* -------- SAVE PENDING STATUS IN REDIS -------- */
-    const expiresAt = Date.now() + 20 * 60 * 1000; // 20 minutes
-    const pendingKey = `pending:${sessionId}`;
-
-    /* store as a plain string and let Redis delete it after 20 min */
-    await redis.set(
-      pendingKey,
-      JSON.stringify({
-        sessionId,
-        paymentIntentId: paymentIntent.id,
-        bookingIds,
-        totalPrice: amount / 100,
-        expiresAt,
-        status: "pending",
-      }),
-      { ex: 60 * 20, nx: true } // ex = TTL in seconds
-    );
-
-    /* ---------------------------------------------- */
 
     // Respond with the client secret needed for completing the payment
     return new Response(

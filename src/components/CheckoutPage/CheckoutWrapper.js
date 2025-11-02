@@ -19,14 +19,14 @@ import CheckoutForm from "@/components/CheckoutPage/CheckoutForm";
 import { useDeleteTempBooking } from "@/hooks/useDeleteTempBooking";
 
 // Initialize Stripe - TEST
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY
-);
+// const stripePromise = loadStripe(
+//   process.env.NEXT_PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY
+// );
 
 // Initialize Stripe
-// const stripePromise = loadStripe(
-//   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-// );
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+);
 
 /**
  * CheckoutWrapper Component
@@ -64,7 +64,23 @@ const CheckoutWrapper = () => {
 
     (async () => {
       try {
-        const res = await fetch(`/api/checkout-status/${id}`);
+        // Get paymentIntentId from bookingData (stored in sessionStorage)
+        const storedData = sessionStorage.getItem(`checkout_${id}`);
+        if (!storedData) {
+          setIsExpired(true);
+          return;
+        }
+
+        const parsedData = JSON.parse(storedData);
+        const paymentIntentId = parsedData.paymentIntentId;
+
+        if (!paymentIntentId) {
+          return;
+        }
+
+        const res = await fetch(
+          `/api/checkout-status/${id}?paymentIntentId=${paymentIntentId}`
+        );
         const info = await res.json();
 
         if (info.status === "paid") {
@@ -72,9 +88,8 @@ const CheckoutWrapper = () => {
           return;
         }
         if (info.status === "expired") {
-          setIsExpired(true); // triggers your existing “Session expired” UI
+          setIsExpired(true);
         }
-        // if pending → keep rendering the checkout form as usual
       } catch (err) {
         console.error("status check failed", err);
       }
