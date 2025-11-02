@@ -19,14 +19,14 @@ import CheckoutForm from "@/components/CheckoutPage/CheckoutForm";
 import { useDeleteTempBooking } from "@/hooks/useDeleteTempBooking";
 
 // Initialize Stripe - TEST
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY
-);
+// const stripePromise = loadStripe(
+//   process.env.NEXT_PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY
+// );
 
 // Initialize Stripe
-// const stripePromise = loadStripe(
-//   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-// );
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+);
 
 /**
  * CheckoutWrapper Component

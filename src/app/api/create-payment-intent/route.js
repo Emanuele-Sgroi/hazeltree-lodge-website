@@ -13,7 +13,10 @@ import Stripe from "stripe";
 import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
 
-// for testing
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error("STRIPE_SECRET_KEY is not set in environment variables");
+}
+
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 // Initialize Stripe with the secret key from the environment variables
