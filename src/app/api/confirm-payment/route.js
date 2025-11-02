@@ -1,7 +1,5 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
-import { buildBookingUpdates } from "@/lib/buildBookingUpdates";
-import { updateBeds24ServerSide } from "@/lib/beds24";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -13,42 +11,64 @@ export async function POST(req) {
       bookingData,
       sessionId,
       guestValues,
-    } = await req.json(); // send guestValues from CheckoutForm
+    } = await req.json();
 
-    /* 1. Retrieve the intent – maybe it's already succeeded */
-    let paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-    /* 2. Confirm if still in requires_confirmation */
-    if (paymentIntent.status !== "succeeded") {
-      paymentIntent = await stripe.paymentIntents.confirm(
-        paymentIntentId,
-        { payment_method: paymentMethodId },
-        { idempotencyKey: `confirm_${paymentIntentId}` }
+    if (!paymentIntentId || !paymentMethodId) {
+      return NextResponse.json(
+        { success: false, error: "Missing payment details" },
+        { status: 400 }
       );
     }
 
-    /* 3. Success path */
-    if (paymentIntent.status === "succeeded") {
-      /* Build booking updates and send to Beds24 */
-      try {
-        const bookingUpdates = buildBookingUpdates({
-          bookingData,
-          totalPrice: paymentIntent.amount / 100,
-          guestValues,
-          piId: paymentIntent.id,
-        });
-        await updateBeds24ServerSide(bookingUpdates);
-      } catch (bedsErr) {
-        console.error("Beds24 update failed:", bedsErr);
-        // you might alert yourself here but don't fail the payment
-      }
+    // Retrieve the PaymentIntent
+    let paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-      return NextResponse.json({ success: true, paymentIntentId });
+    // If already succeeded, skip confirmation
+    if (paymentIntent.status === "succeeded") {
+      // Payment already completed, update Beds24
+      return NextResponse.json({
+        success: true,
+        paymentIntentId: paymentIntent.id,
+      });
     }
 
-    /* 4. Failure path */
+    // Confirm the payment with unique idempotency key
+    const idempotencyKey = `confirm_${paymentIntentId}_${Date.now()}`;
+
+    paymentIntent = await stripe.paymentIntents.confirm(
+      paymentIntentId,
+      {
+        payment_method: paymentMethodId,
+        return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/booking/checkout/${sessionId}`,
+      },
+      { idempotencyKey }
+    );
+
+    // Handle different payment statuses
+    if (paymentIntent.status === "succeeded") {
+      // Payment succeeded immediately (no 3DS required)
+      return NextResponse.json({
+        success: true,
+        paymentIntentId: paymentIntent.id,
+      });
+    }
+
+    if (paymentIntent.status === "requires_action") {
+      // 3D Secure authentication required - client must handle this
+      return NextResponse.json({
+        success: false,
+        requiresAction: true,
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+      });
+    }
+
+    // Any other status is a failure
     return NextResponse.json(
-      { success: false, error: "Payment could not be completed." },
+      {
+        success: false,
+        error: `Payment status: ${paymentIntent.status}`,
+      },
       { status: 400 }
     );
   } catch (error) {
@@ -56,65 +76,9 @@ export async function POST(req) {
     return NextResponse.json(
       {
         success: false,
-        error: "Something went wrong during the payment. Please try again.",
-        devError: error.message,
+        error: error.message || "Payment confirmation failed",
       },
       { status: 500 }
     );
   }
 }
-
-// import Stripe from "stripe";
-// import { NextResponse } from "next/server";
-// import { redis } from "@/lib/redis";
-
-// const stripe = new Stripe(process.env.STRIPE_TEST_SECRET_KEY);
-
-// export async function POST(req) {
-//   try {
-//     const { paymentIntentId, paymentMethodId, bookingData, sessionId } =
-//       await req.json();
-
-//     /* 1. Get the PaymentIntent – maybe it already succeeded */
-//     let paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-//     /* 2. Still needs confirmation? do it */
-//     if (paymentIntent.status !== "succeeded") {
-//       paymentIntent = await stripe.paymentIntents.confirm(
-//         paymentIntentId,
-//         { payment_method: paymentMethodId },
-//         { idempotencyKey: `confirm_${paymentIntentId}` }
-//       );
-//     }
-
-//     /* 3. If it ended in success → mark Redis “paid” */
-//     if (paymentIntent.status === "succeeded") {
-//       if (sessionId) {
-//         const key = `pending:${sessionId}`;
-//         const raw = await redis.get(key); // may be string or object
-//         if (raw) {
-//           const rec = typeof raw === "string" ? JSON.parse(raw) : raw;
-//           rec.status = "paid";
-//           await redis.set(key, JSON.stringify(rec), { ex: 60 * 20 });
-//         }
-//       }
-//       return NextResponse.json({ success: true, paymentIntentId });
-//     }
-
-//     /* 4. Anything else is treated as failure */
-//     return NextResponse.json(
-//       { success: false, error: "Payment could not be completed." },
-//       { status: 400 }
-//     );
-//   } catch (error) {
-//     console.error("Error confirming payment:", error);
-//     return NextResponse.json(
-//       {
-//         success: false,
-//         error: "Something went wrong during the payment. Please try again.",
-//         devError: error.message,
-//       },
-//       { status: 500 }
-//     );
-//   }
-// }
