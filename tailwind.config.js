@@ -22,6 +22,7 @@ module.exports = {
       },
       colors: {
         "accent-green": "#367a35",
+        "accent-brown": "#8b7355",
         "dark-blue": "#101838",
         "error-text": "#d32f2f",
         border: "hsl(var(--border))",
